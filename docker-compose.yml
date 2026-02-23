@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: smartatende_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:smartatende2026@db:5432/Smart_Atende_AI?schema=public
+      - JWT_SECRET=smart-atende-ai-vps-secret-key-2026
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./baileys_auth_info:/app/baileys_auth_info
+    networks:
+      - smartatende_net
+
+  db:
+    image: postgres:15-alpine
+    container_name: smartatende_db
+    restart: always
+    ports:
+      - "5435:5432" # Hosted on 5435 to avoid conflict with connectflow/zap-ai
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=smartatende2026
+      - POSTGRES_DB=Smart_Atende_AI
+    volumes:
+      - smartatende_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - smartatende_net
+
+volumes:
+  smartatende_db_data:
+
+
+networks:
+  smartatende_net:
+    driver: bridge

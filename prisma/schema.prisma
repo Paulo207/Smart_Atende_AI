@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String   // Hashed password
+  createdAt DateTime @default(now())
+}
+
+model AISettings {
+  id           Int     @id @default(1)
+  apiKey       String?
+  model        String  @default("z-ai/glm-4.5-air:free")
+  temperature  String  @default("0.7")
+  systemPrompt String? @default("Você é um assistente virtual prestativo e educado.")
+}
+
+model Appointment {
+  id        String   @id @default(uuid())
+  userPhone String
+  userName  String?
+  date      String
+  time      String
+  service   String
+  status    String   @default("confirmado")
+  createdAt DateTime @default(now())
+}
+
+model Contact {
+  id        String   @id @default(uuid())
+  name      String?
+  phone     String   @unique
+  email     String?
+  tags      String?  // JSON-like string storage
+  createdAt DateTime @default(now())
+}
+
+model Automation {
+  id        String   @id @default(uuid())
+  keyword   String
+  response  String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+}
+
+model Knowledge {
+  id        String   @id @default(uuid())
+  question  String
+  answer    String
+  createdAt DateTime @default(now())
+}

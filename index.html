@@ -1,0 +1,2034 @@
+<!doctype html>
+<html lang="pt-BR" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartAtende AI</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;display=swap"
+    rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+    }
+
+    .gradient-bg {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+    }
+
+    .glass-card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(71, 85, 105, 0.3);
+    }
+
+    .glow-green {
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    }
+
+    .glow-purple {
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.3);
+    }
+
+    .pulse-dot {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.5;
+      }
+    }
+
+    .slide-in {
+      animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(-20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #1e293b;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #64748b;
+    }
+
+    .chat-container {
+      height: calc(100vh - 160px);
+    }
+
+    .message-bubble {
+      max-width: 80%;
+      word-wrap: break-word;
+      padding: 0.75rem 1rem;
+      border-radius: 1.25rem;
+    }
+
+    .message-sent {
+      background: linear-gradient(135deg, #22c55e 0%, #10b981 100%);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 0.25rem;
+    }
+
+    .message-received {
+      background: #334155;
+      color: white;
+      align-self: flex-start;
+      border-bottom-left-radius: 0.25rem;
+    }
+
+    .chat-list-item.active {
+      background: rgba(34, 197, 94, 0.1);
+      border-left: 3px solid #22c55e;
+    }
+  </style>
+  <style>
+    body {
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+
+<body class="h-full gradient-bg text-slate-100 font-sans overflow-hidden">
+  <div id="app" class="h-full flex">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="w-64 glass-card border-r border-slate-700/50 flex flex-col">
+      <!-- Logo -->
+      <div class="p-6 border-b border-slate-700/50">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center glow-green">
+            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+          </div>
+          <div>
+            <h1 id="app-title" class="font-bold text-lg text-white">SmartAtende AI</h1><span
+              class="text-xs text-slate-400">Automação Inteligente</span>
+          </div>
+        </div>
+      </div><!-- Navigation -->
+      <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+        <button onclick="setActiveTab('dashboard')" data-tab="dashboard"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all bg-green-500/20 text-green-400 border border-green-500/30">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          </svg><span class="font-medium">Dashboard</span> </button> <button onclick="setActiveTab('conversations')"
+          data-tab="conversations"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all text-slate-400 hover:bg-slate-700/50 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+          </svg><span class="font-medium">Conversas</span> <span
+            class="ml-auto bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">12</span> </button> <button
+          onclick="setActiveTab('agenda')" data-tab="agenda"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all text-slate-400 hover:bg-slate-700/50 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg><span class="font-medium">Agenda</span> </button> <button onclick="setActiveTab('contacts')"
+          data-tab="contacts"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all text-slate-400 hover:bg-slate-700/50 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg><span class="font-medium">CRM / Contatos</span> </button> <button onclick="setActiveTab('automation')"
+          data-tab="automation"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all text-slate-400 hover:bg-slate-700/50 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg><span class="font-medium">Automações</span> </button> <button onclick="setActiveTab('knowledge')"
+          data-tab="knowledge"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all text-slate-400 hover:bg-slate-700/50 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          </svg><span class="font-medium">Base de Conhecimento</span> </button> <button
+          onclick="setActiveTab('webhook')" data-tab="webhook"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all text-slate-400 hover:bg-slate-700/50 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg><span class="font-medium">Webhooks</span> </button> <button onclick="setActiveTab('settings')"
+          data-tab="settings"
+          class="nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all text-slate-400 hover:bg-slate-700/50 hover:text-white">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg><span class="font-medium">Configurações</span> </button>
+      </nav><!-- Connection Status -->
+      <div class="p-4 border-t border-slate-700/50">
+        <div id="connection-status" class="glass-card rounded-xl p-4">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-3 h-3 rounded-full bg-green-500 pulse-dot"></div><span
+              class="text-sm font-medium text-green-400">WhatsApp Conectado</span>
+          </div>
+          <p class="text-xs text-slate-400">+55 11 99999-9999</p>
+          <p class="text-xs text-slate-500 mt-1">Instância: zapi_001</p>
+        </div>
+      </div>
+    </aside><!-- Main Content -->
+    <main class="flex-1 flex flex-col overflow-hidden">
+      <!-- Header -->
+      <header class="glass-card border-b border-slate-700/50 px-6 py-4 flex items-center justify-between">
+        <div>
+          <h2 id="page-title" class="text-xl font-bold text-white">Dashboard</h2>
+          <p id="welcome-text" class="text-sm text-slate-400">Bem-vindo ao painel de controle</p>
+        </div>
+        <div class="flex items-center gap-4">
+          <button class="relative p-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+            </svg><span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span> </button>
+          <div class="flex items-center gap-3 bg-slate-800/50 p-2 pr-4 rounded-2xl border border-slate-700/50">
+            <div id="user-avatar"
+              class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-white font-bold shadow-lg shadow-green-500/20">
+              A
+            </div>
+            <div class="hidden sm:block">
+              <p id="user-name" class="text-sm font-medium text-white">Carregando...</p>
+              <p class="text-[10px] text-green-400 font-bold uppercase tracking-wider">Membro Premium</p>
+            </div>
+            <button onclick="logout()" class="ml-4 p-2 text-slate-400 hover:text-red-400 transition-colors"
+              title="Sair">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </header><!-- Content Area -->
+      <div id="content-area" class="flex-1 overflow-y-auto p-6">
+        <!-- Dashboard Tab -->
+        <div id="tab-dashboard" class="tab-content fade-in">
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="glass-card rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                </div><span class="text-xs text-green-400 bg-green-500/20 px-2 py-1 rounded-full">+12%</span>
+              </div>
+              <p class="text-3xl font-bold text-white">1,247</p>
+              <p class="text-sm text-slate-400 mt-1">Mensagens Hoje</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M17 8h2a2 2 0 012 2v6a2 2 0 01-2 2h-2v4l-4-4H9a1.994 1.994 0 01-1.414-.586m0 0L11 14h4a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2v4l.586-.586z" />
+                  </svg>
+                </div><span class="text-xs text-blue-400 bg-blue-500/20 px-2 py-1 rounded-full">+8%</span>
+              </div>
+              <p class="text-3xl font-bold text-white">89</p>
+              <p class="text-sm text-slate-400 mt-1">Conversas Ativas</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div><span class="text-xs text-purple-400 bg-purple-500/20 px-2 py-1 rounded-full">+23%</span>
+              </div>
+              <p class="text-3xl font-bold text-white">156</p>
+              <p class="text-sm text-slate-400 mt-1">Leads Capturados</p>
+            </div>
+            <div class="glass-card rounded-2xl p-5">
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-amber-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div><span class="text-xs text-amber-400 bg-amber-500/20 px-2 py-1 rounded-full">94%</span>
+              </div>
+              <p class="text-3xl font-bold text-white">94%</p>
+              <p class="text-sm text-slate-400 mt-1">Taxa de Resposta IA</p>
+            </div>
+          </div><!-- Charts and Activity -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Activity Chart -->
+            <div class="lg:col-span-2 glass-card rounded-2xl p-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Atividade Semanal</h3>
+              <div class="h-64 flex items-end justify-around gap-2">
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-12 bg-gradient-to-t from-green-600 to-green-400 rounded-t-lg" style="height: 60%"></div>
+                  <span class="text-xs text-slate-400">Seg</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-12 bg-gradient-to-t from-green-600 to-green-400 rounded-t-lg" style="height: 80%"></div>
+                  <span class="text-xs text-slate-400">Ter</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-12 bg-gradient-to-t from-green-600 to-green-400 rounded-t-lg" style="height: 45%"></div>
+                  <span class="text-xs text-slate-400">Qua</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-12 bg-gradient-to-t from-green-600 to-green-400 rounded-t-lg" style="height: 90%"></div>
+                  <span class="text-xs text-slate-400">Qui</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-12 bg-gradient-to-t from-green-600 to-green-400 rounded-t-lg" style="height: 70%"></div>
+                  <span class="text-xs text-slate-400">Sex</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-12 bg-gradient-to-t from-purple-600 to-purple-400 rounded-t-lg" style="height: 40%">
+                  </div><span class="text-xs text-slate-400">Sáb</span>
+                </div>
+                <div class="flex flex-col items-center gap-2">
+                  <div class="w-12 bg-gradient-to-t from-purple-600 to-purple-400 rounded-t-lg" style="height: 30%">
+                  </div><span class="text-xs text-slate-400">Dom</span>
+                </div>
+              </div>
+            </div><!-- Recent Activity -->
+            <div class="glass-card rounded-2xl p-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Atividade Recente</h3>
+              <div class="space-y-4">
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm text-white">Novo lead capturado</p>
+                    <p class="text-xs text-slate-400">João Silva - há 5 min</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm text-white">IA respondeu automaticamente</p>
+                    <p class="text-xs text-slate-400">Maria Costa - há 12 min</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm text-white">Base de conhecimento atualizada</p>
+                    <p class="text-xs text-slate-400">Sistema - há 1 hora</p>
+                  </div>
+                </div>
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <p class="text-sm text-white">Automação executada</p>
+                    <p class="text-xs text-slate-400">Boas-vindas - há 2 horas</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Conversations Tab -->
+        <div id="tab-conversations" class="tab-content hidden fade-in h-chat">
+          <div class="glass-card rounded-2xl overflow-hidden flex chat-container">
+            <!-- Sidebar: Lista de Chats -->
+            <div class="w-80 border-r border-slate-700/50 flex flex-col bg-slate-900/30">
+              <div class="p-4 border-b border-slate-700/50">
+                <h3 class="font-semibold text-white">Conversas Recentes</h3>
+              </div>
+              <div id="chat-list" class="flex-1 overflow-y-auto">
+                <!-- Chats dynamic content -->
+                <div class="p-8 text-center text-slate-500">
+                  <p class="text-sm">Nenhuma conversa ativa</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Main: Janela de Chat -->
+            <div class="flex-1 flex flex-col bg-slate-900/10">
+              <div id="chat-header" class="p-4 border-b border-slate-700/50 flex items-center justify-between hidden">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold"
+                    id="active-chat-avatar">?</div>
+                  <div>
+                    <p class="font-medium text-white" id="active-chat-name">Selecionar conversa</p>
+                    <p class="text-xs text-green-400">Online</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Messages Area -->
+              <div id="message-list"
+                class="flex-1 overflow-y-auto p-6 flex flex-col gap-4 bg-[url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png')] bg-repeat opacity-90">
+                <div class="flex-1 flex items-center justify-center text-slate-500 flex-col gap-3">
+                  <svg class="w-16 h-16 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1"
+                      d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                  </svg>
+                  <p>Selecione uma conversa para visualizar o histórico</p>
+                </div>
+              </div>
+
+              <!-- Input Area -->
+              <div id="chat-input-area" class="p-4 bg-slate-800/50 border-t border-slate-700/50 hidden">
+                <div class="flex gap-3">
+                  <input type="text" id="chat-input" placeholder="Digite uma mensagem..."
+                    class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500">
+                  <button onclick="sendManualMessage()"
+                    class="bg-green-500 hover:bg-green-600 text-white p-3 rounded-xl transition-all">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Agenda Tab -->
+      <div id="tab-agenda" class="tab-content hidden fade-in">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="text-xl font-bold text-white">Agenda de Marcações</h3>
+            <p class="text-slate-400 text-sm">Gerencie seus agendamentos confirmados</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="loadAppointments()"
+              class="p-2 bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-all">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="appointments-list">
+          <!-- Appointments will be rendered here -->
+          <div class="col-span-full p-12 glass-card rounded-2xl text-center">
+            <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <p class="text-slate-400">Nenhum agendamento encontrado</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contacts Tab -->
+      <div id="tab-contacts" class="tab-content hidden fade-in">
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center gap-4">
+            <div class="relative">
+              <input type="text" placeholder="Buscar contatos..."
+                class="w-64 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 pl-10 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
+              <svg class="w-5 h-5 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor"
+                viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div><select
+              class="bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-green-500">
+              <option>Todas as Tags</option>
+              <option>🔥 Hot Lead</option>
+              <option>💬 Em Negociação</option>
+              <option>✅ Cliente</option>
+            </select>
+          </div><button onclick="openAddContactModal()"
+            class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-xl font-medium transition-all glow-green">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg> Novo Contato </button>
+        </div>
+        <div class="glass-card rounded-2xl overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-slate-800/50">
+              <tr>
+                <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Contato</th>
+                <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Telefone</th>
+                <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Tags</th>
+                <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Última Interação</th>
+                <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="contacts-list">
+              <!-- Contacts will be rendered here -->
+            </tbody>
+          </table>
+        </div>
+      </div><!-- Automation Tab -->
+      <div id="tab-automation" class="tab-content hidden fade-in">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-lg font-semibold text-white">Respostas Automáticas</h3><button
+            onclick="openAddAutomationModal()"
+            class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-xl font-medium transition-all glow-green">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg> Nova Automação </button>
+        </div>
+        <div id="automations-list" class="space-y-4">
+          <!-- Automations will be rendered here -->
+        </div>
+      </div><!-- Knowledge Base Tab -->
+      <div id="tab-knowledge" class="tab-content hidden fade-in">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h3 class="text-lg font-semibold text-white">Base de Conhecimento</h3>
+            <p class="text-sm text-slate-400">Treine a IA com perguntas e respostas</p>
+          </div><button onclick="openAddKnowledgeModal()"
+            class="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-4 py-2 rounded-xl font-medium transition-all glow-purple">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+            </svg> Adicionar Conhecimento </button>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div class="glass-card rounded-2xl p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-white" id="knowledge-count">0</p>
+                <p class="text-sm text-slate-400">Perguntas Treinadas</p>
+              </div>
+            </div>
+            <div class="w-full bg-slate-700 rounded-full h-2">
+              <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full" style="width: 45%"></div>
+            </div>
+            <p class="text-xs text-slate-400 mt-2">45% da capacidade utilizada</p>
+          </div>
+          <div class="glass-card rounded-2xl p-6">
+            <div class="flex items-center gap-3 mb-4">
+              <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <p class="text-2xl font-bold text-white">94%</p>
+                <p class="text-sm text-slate-400">Precisão de Respostas</p>
+              </div>
+            </div>
+            <div class="flex gap-2 mt-2">
+              <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">👍 234 úteis</span> <span
+                class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded-full">👎 14 não úteis</span>
+            </div>
+          </div>
+        </div>
+        <div class="glass-card rounded-2xl overflow-hidden">
+          <div class="p-4 border-b border-slate-700/50">
+            <input type="text" placeholder="Buscar na base de conhecimento..."
+              class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-purple-500">
+          </div>
+          <div id="knowledge-list" class="divide-y divide-slate-700/50">
+            <!-- Knowledge items will be rendered here -->
+          </div>
+        </div>
+      </div><!-- Webhook Tab -->
+      <div id="tab-webhook" class="tab-content hidden fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-card rounded-2xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Webhook de Destino</h3>
+            <p class="text-sm text-slate-400 mb-4">Insira a URL do seu sistema (n8n, Make, Typebot) para receber os
+              eventos do WhatsApp em tempo real.</p>
+            <div class="space-y-4 mb-6">
+              <div>
+                <label for="webhook-url" class="block text-sm text-slate-400 mb-2">URL do Webhook</label>
+                <input type="url" id="webhook-url" placeholder="https://seu-n8n.com/webhook/..."
+                  class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
+              </div>
+              <button onclick="saveWebhookSettings()" id="btn-save-webhook"
+                class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-3 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/25">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                </svg> Salvar Webhook
+              </button>
+            </div>
+            <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl mb-4">
+              <div class="flex items-center gap-3">
+                <div class="w-3 h-3 rounded-full bg-green-500 pulse-dot"></div><span class="text-sm text-white">Webhook
+                  Ativo</span>
+              </div><label class="relative inline-flex items-center cursor-pointer"> <input type="checkbox" checked
+                  class="sr-only peer">
+                <div
+                  class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500">
+                </div>
+              </label>
+            </div>
+            <h4 class="text-sm font-medium text-white mb-3">Eventos Monitorados</h4>
+            <div class="space-y-2">
+              <label
+                class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl cursor-pointer hover:bg-slate-700/50 transition-colors">
+                <input type="checkbox" checked
+                  class="w-4 h-4 text-green-500 bg-slate-700 border-slate-600 rounded focus:ring-green-500"> <span
+                  class="text-sm text-white">Mensagem Recebida</span> </label> <label
+                class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl cursor-pointer hover:bg-slate-700/50 transition-colors">
+                <input type="checkbox" checked
+                  class="w-4 h-4 text-green-500 bg-slate-700 border-slate-600 rounded focus:ring-green-500"> <span
+                  class="text-sm text-white">Mensagem Enviada</span> </label> <label
+                class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl cursor-pointer hover:bg-slate-700/50 transition-colors">
+                <input type="checkbox"
+                  class="w-4 h-4 text-green-500 bg-slate-700 border-slate-600 rounded focus:ring-green-500"> <span
+                  class="text-sm text-white">Status de Conexão</span> </label>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Últimos Eventos</h3>
+            <div class="space-y-3 max-h-96 overflow-y-auto">
+              <div class="p-3 bg-slate-800/50 rounded-xl">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">message_received</span>
+                  <span class="text-xs text-slate-400">há 2 min</span>
+                </div><code
+                  class="text-xs text-slate-300 block overflow-hidden text-ellipsis">{"from": "+5511999999999", "body": "Olá!"}</code>
+              </div>
+              <div class="p-3 bg-slate-800/50 rounded-xl">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">message_sent</span> <span
+                    class="text-xs text-slate-400">há 5 min</span>
+                </div><code
+                  class="text-xs text-slate-300 block overflow-hidden text-ellipsis">{"to": "+5511999999999", "body": "Olá! Como posso ajudar?"}</code>
+              </div>
+              <div class="p-3 bg-slate-800/50 rounded-xl">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded-full">connection_update</span>
+                  <span class="text-xs text-slate-400">há 1 hora</span>
+                </div><code
+                  class="text-xs text-slate-300 block overflow-hidden text-ellipsis">{"status": "connected"}</code>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- Conversations Tab -->
+      <div id="tab-conversations" class="tab-content hidden fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+          <!-- Conversation List -->
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="p-4 border-b border-slate-700/50">
+              <input type="text" placeholder="Buscar conversas..."
+                class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
+            </div>
+            <div class="divide-y divide-slate-700/50 max-h-[500px] overflow-y-auto">
+              <div class="p-4 hover:bg-slate-700/30 cursor-pointer bg-slate-700/20 border-l-4 border-green-500">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                    <span class="text-white font-bold">JS</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-white truncate">João Silva</p><span
+                        class="text-xs text-slate-400">14:32</span>
+                    </div>
+                    <p class="text-xs text-slate-400 truncate">Olá, gostaria de saber mais sobre...</p>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 hover:bg-slate-700/30 cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
+                    <span class="text-white font-bold">MC</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-white truncate">Maria Costa</p><span
+                        class="text-xs text-slate-400">13:15</span>
+                    </div>
+                    <p class="text-xs text-slate-400 truncate">Obrigada pela informação!</p>
+                  </div>
+                </div>
+              </div>
+              <div class="p-4 hover:bg-slate-700/30 cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <div
+                    class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
+                    <span class="text-white font-bold">PS</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center justify-between">
+                      <p class="text-sm font-medium text-white truncate">Pedro Santos</p><span
+                        class="text-xs text-slate-400">11:42</span>
+                    </div>
+                    <p class="text-xs text-slate-400 truncate">Qual o prazo de entrega?</p>
+                  </div><span
+                    class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-xs text-white">2</span>
+                </div>
+              </div>
+            </div>
+          </div><!-- Chat View -->
+          <div class="lg:col-span-2 glass-card rounded-2xl flex flex-col overflow-hidden">
+            <div class="p-4 border-b border-slate-700/50 flex items-center justify-between">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                  <span class="text-white font-bold">JS</span>
+                </div>
+                <div>
+                  <p class="font-medium text-white">João Silva</p>
+                  <p class="text-xs text-slate-400">+55 11 99999-9999</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">🔥 Hot Lead</span> <button
+                  class="p-2 rounded-xl hover:bg-slate-700/50 transition-colors">
+                  <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                  </svg></button>
+              </div>
+            </div>
+            <div class="flex-1 p-4 space-y-4 overflow-y-auto max-h-80">
+              <div class="flex justify-start">
+                <div class="max-w-xs bg-slate-700/50 rounded-2xl rounded-tl-none px-4 py-3">
+                  <p class="text-sm text-white">Olá, gostaria de saber mais sobre os planos do SmartAtende!</p><span
+                    class="text-xs text-slate-400 mt-1 block">14:30</span>
+                </div>
+              </div>
+              <div class="flex justify-end">
+                <div
+                  class="max-w-xs bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl rounded-tr-none px-4 py-3">
+                  <p class="text-sm text-white">Olá João! 👋 Temos planos a partir de R$97/mês. Qual funcionalidade é
+                    mais importante para você?</p>
+                  <div class="flex items-center justify-end gap-1 mt-1">
+                    <span class="text-xs text-green-200">14:31</span>
+                    <svg class="w-4 h-4 text-green-200" fill="currentColor" viewbox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div class="flex justify-center">
+                <span class="text-xs bg-slate-700/50 text-slate-400 px-3 py-1 rounded-full">🤖 Resposta automática da
+                  IA</span>
+              </div>
+              <div class="flex justify-start">
+                <div class="max-w-xs bg-slate-700/50 rounded-2xl rounded-tl-none px-4 py-3">
+                  <p class="text-sm text-white">Preciso de automação de respostas e integração com meu CRM</p><span
+                    class="text-xs text-slate-400 mt-1 block">14:32</span>
+                </div>
+              </div>
+            </div>
+            <div class="p-4 border-t border-slate-700/50">
+              <div class="flex items-center gap-3">
+                <button class="p-2 rounded-xl hover:bg-slate-700/50 transition-colors">
+                  <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                  </svg></button> <input type="text" placeholder="Digite sua mensagem..."
+                  class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
+                <button
+                  class="p-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 transition-all">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg></button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- Settings Tab -->
+      <div id="tab-settings" class="tab-content hidden fade-in">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div class="glass-card rounded-2xl p-6">
+            <h3 class="text-lg font-semibold text-white mb-4">Conexão WhatsApp (Baileys)</h3>
+            <div id="wa-connection-ui" class="space-y-4">
+              <p class="text-sm text-slate-400 mb-4">O WhatsApp será conectado via QR Code oficial.</p>
+              <button onclick="handleWhatsAppConnect()" id="btn-wa-connect"
+                class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-medium transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                </svg> Gerar QR Code </button>
+            </div>
+
+            <div id="wa-pairing-ui"
+              class="hidden mt-6 p-6 bg-white rounded-2xl border border-green-500/30 text-center fade-in">
+              <div class="aspect-square max-w-64 mx-auto flex items-center justify-center p-2">
+                <img id="wa-qr-img" src="" alt="Aguardando QR Code..."
+                  class="w-full h-full object-contain mix-blend-multiply">
+              </div>
+              <p class="text-xs text-slate-700 mt-4 font-medium leading-relaxed">
+                Abra o WhatsApp no seu celular → <span class="font-bold">Aparelhos Conectados</span> → <span
+                  class="font-bold">Conectar um aparelho</span> e escaneie o código acima.
+              </p>
+            </div>
+
+            <div id="wa-connected-ui"
+              class="hidden mt-6 p-6 bg-green-500/10 rounded-2xl border border-green-500/30 text-center fade-in">
+              <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p class="text-lg font-semibold text-white mb-2">WhatsApp Conectado!</p>
+              <p class="text-sm text-slate-400 mb-6">Tudo pronto para começar a automatizar.</p>
+              <button onclick="handleWhatsAppDisconnect()"
+                class="w-full py-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-xl font-medium transition-all flex items-center justify-center gap-2 border border-red-500/30">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg> Desconectar WhatsApp
+              </button>
+            </div><!-- AI Settings -->
+            <div class="glass-card rounded-2xl p-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Configurações da IA</h3>
+              <div class="space-y-4">
+                <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700 mb-4">
+                  <p class="text-sm text-slate-300 mb-2">🔗 <span class="font-medium">Provedor:</span> OpenRouter</p>
+                  <p class="text-xs text-slate-400">Obtenha sua chave gratuitamente em <a href="https://openrouter.ai"
+                      target="_blank" rel="noopener noreferrer"
+                      class="text-green-400 hover:text-green-300 underline">openrouter.ai</a></p>
+                </div>
+                <div>
+                  <label for="openrouter-key" class="block text-sm text-slate-400 mb-2">Chave API OpenRouter</label>
+                  <input type="password" id="openrouter-key" placeholder="sk-or-••••••••••••••••"
+                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
+                </div>
+                <div>
+                  <label for="ai-model" class="block text-sm text-slate-400 mb-2">Modelo de IA</label> <select
+                    id="ai-model"
+                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500">
+                    <optgroup label="Modelos Gratuitos (Sem Custo)">
+                      <option value="z-ai/glm-4.5-air:free">Z-AI GLM-4.5-Air (Gratuito)</option>
+                      <option value="google/gemini-2.0-flash-exp:free">Google Gemini 2.0 Flash (Gratuito)</option>
+                      <option value="meta-llama/llama-3-8b-instruct:free">Llama 3 8B (Gratuito)</option>
+                      <option value="mistralai/mistral-7b-instruct:free">Mistral 7B (Gratuito)</option>
+                    </optgroup>
+                    <optgroup label="Modelos Pagos (Premium)">
+                      <option value="openai/gpt-4o">GPT-4o</option>
+                      <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
+                      <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                      <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
+                      <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet</option>
+                    </optgroup>
+                  </select>
+                </div>
+                <div>
+                  <label for="ai-temperature" class="block text-sm text-slate-400 mb-2">Temperatura: <span
+                      id="temp-value">0.7</span></label> <input type="range" id="ai-temperature" min="0" max="1"
+                    step="0.1" value="0.7" class="w-full accent-green-500">
+                </div>
+                <div>
+                  <label for="system-prompt" class="block text-sm text-slate-400 mb-2">Prompt do Sistema</label>
+                  <textarea id="system-prompt" rows="4" placeholder="Você é um assistente virtual amigável..."
+                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500 resize-none"></textarea>
+                </div>
+                <button onclick="saveAISettings()" id="btn-save-ai"
+                  class="w-full mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-4 py-3 rounded-xl font-medium transition-all shadow-lg shadow-purple-500/25">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                  </svg> Salvar Configurações da IA
+                </button>
+              </div>
+            </div><!-- Anti-Ban Settings -->
+            <div class="glass-card rounded-2xl p-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Configurações Anti-Banimento</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl">
+                  <div>
+                    <p class="text-sm text-white">Atraso entre mensagens</p>
+                    <p class="text-xs text-slate-400">Evita detecção de spam</p>
+                  </div><label class="relative inline-flex items-center cursor-pointer"> <input type="checkbox" checked
+                      class="sr-only peer">
+                    <div
+                      class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500">
+                    </div>
+                  </label>
+                </div>
+                <div>
+                  <label for="delay-min" class="block text-sm text-slate-400 mb-2">Atraso Mínimo (segundos)</label>
+                  <input type="number" id="delay-min" value="3"
+                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500">
+                </div>
+                <div>
+                  <label for="delay-max" class="block text-sm text-slate-400 mb-2">Atraso Máximo (segundos)</label>
+                  <input type="number" id="delay-max" value="10"
+                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500">
+                </div>
+                <div>
+                  <label for="daily-limit" class="block text-sm text-slate-400 mb-2">Limite Diário de
+                    Mensagens</label>
+                  <input type="number" id="daily-limit" value="500"
+                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500">
+                </div>
+                <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl">
+                  <div>
+                    <p class="text-sm text-white">Simulação de digitação</p>
+                    <p class="text-xs text-slate-400">Humaniza as respostas</p>
+                  </div><label class="relative inline-flex items-center cursor-pointer"> <input type="checkbox" checked
+                      class="sr-only peer">
+                    <div
+                      class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500">
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div><!-- Modal Container -->
+  <div id="modal-overlay"
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div id="modal-content" class="glass-card rounded-2xl w-full max-w-md p-6 slide-in">
+      <!-- Modal content will be inserted here -->
+    </div>
+  </div><!-- Toast Container -->
+  <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2"></div>
+  <script>
+    // --- Authentication ---
+    const token = localStorage.getItem('token');
+    if (!token && !window.location.pathname.startsWith('/login')) {
+      window.location.href = '/login';
+    }
+
+    // Global Fetch Interceptor for JWT
+    const originalFetch = window.fetch;
+    window.fetch = async (url, options = {}) => {
+      const storedToken = localStorage.getItem('token');
+      if (storedToken) {
+        options.headers = {
+          ...options.headers,
+          'Authorization': `Bearer ${storedToken}`
+        };
+      }
+      const response = await originalFetch(url, options);
+      if (response.status === 401 || response.status === 403) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+      return response;
+    };
+
+    async function loadMe() {
+      try {
+        const res = await fetch('/api/auth/me');
+        if (res && res.ok) {
+          const user = await res.json();
+          document.getElementById('user-name').textContent = user.name;
+          document.getElementById('user-avatar').textContent = user.name.charAt(0).toUpperCase();
+        }
+      } catch (e) {
+        console.error("Erro ao carregar perfil:", e);
+      }
+    }
+
+    function logout() {
+      if (confirm('Deseja realmente sair do painel?')) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+    }
+
+    loadMe();
+
+    // State Management
+    let currentTab = 'dashboard';
+    let contacts = [];
+    let automations = [];
+    let knowledgeBase = [];
+    let isLoading = false;
+
+    // Default Config
+    const defaultConfig = {
+      app_title: 'SmartAtende AI',
+      welcome_message: 'Bem-vindo ao painel de controle',
+      primary_color: '#22c55e',
+      secondary_color: '#1e293b',
+      text_color: '#f1f5f9',
+      accent_color: '#a855f7',
+      surface_color: '#334155'
+    };
+
+    // Initialize Element SDK
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange: async (config) => {
+          document.getElementById('app-title').textContent = config.app_title || defaultConfig.app_title;
+          document.getElementById('welcome-text').textContent = config.welcome_message || defaultConfig.welcome_message;
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.primary_color || defaultConfig.primary_color,
+              set: (value) => { config.primary_color = value; window.elementSdk.setConfig({ primary_color: value }); }
+            },
+            {
+              get: () => config.secondary_color || defaultConfig.secondary_color,
+              set: (value) => { config.secondary_color = value; window.elementSdk.setConfig({ secondary_color: value }); }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => { config.text_color = value; window.elementSdk.setConfig({ text_color: value }); }
+            },
+            {
+              get: () => config.accent_color || defaultConfig.accent_color,
+              set: (value) => { config.accent_color = value; window.elementSdk.setConfig({ accent_color: value }); }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => { config.surface_color = value; window.elementSdk.setConfig({ surface_color: value }); }
+            }
+          ],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['app_title', config.app_title || defaultConfig.app_title],
+          ['welcome_message', config.welcome_message || defaultConfig.welcome_message]
+        ])
+      });
+    }
+
+    // Initialize Data SDK
+    const dataHandler = {
+      onDataChanged(data) {
+        contacts = data.filter(d => d.type === 'contact');
+        automations = data.filter(d => d.type === 'automation');
+        knowledgeBase = data.filter(d => d.type === 'knowledge');
+
+        renderContacts();
+        renderAutomations();
+        renderKnowledge();
+        updateKnowledgeCount();
+      }
+    };
+
+    async function initDataSdk() {
+      if (window.dataSdk) {
+        const result = await window.dataSdk.init(dataHandler);
+        if (!result.isOk) {
+          showToast('Erro ao inicializar banco de dados', 'error');
+        }
+      }
+    }
+
+    initDataSdk();
+
+    // Tab Navigation
+    function setActiveTab(tab) {
+      currentTab = tab;
+
+      // Update nav buttons
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        const isActive = btn.dataset.tab === tab;
+        btn.className = `nav-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all ${isActive
+          ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+          : 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
+          }`;
+      });
+
+      // Update content
+      document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+      });
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+
+      // Update page title
+      const titles = {
+        dashboard: 'Dashboard',
+        conversations: 'Conversas',
+        agenda: 'Agenda',
+        contacts: 'CRM / Contatos',
+        automation: 'Automações',
+        knowledge: 'Base de Conhecimento',
+        webhook: 'Webhooks',
+        settings: 'Configurações'
+      };
+      document.getElementById('page-title').textContent = titles[tab] || 'Dashboard';
+    }
+
+    // Render Functions
+    function renderContacts() {
+      const container = document.getElementById('contacts-list');
+      if (!container) return;
+
+      if (contacts.length === 0) {
+        container.innerHTML = `
+          <tr>
+            <td colspan="5" class="px-6 py-12 text-center text-slate-400">
+              <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+              </svg>
+              <p>Nenhum contato cadastrado</p>
+              <p class="text-sm mt-1">Clique em "Novo Contato" para adicionar</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      container.innerHTML = contacts.map(contact => `
+        <tr class="border-b border-slate-700/50 hover:bg-slate-700/30">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+                <span class="text-white font-bold">${getInitials(contact.name)}</span>
+              </div>
+              <div>
+                <p class="text-sm font-medium text-white">${contact.name}</p>
+                <p class="text-xs text-slate-400">${contact.email || '-'}</p>
+              </div>
+            </div>
+          </td>
+          <td class="px-6 py-4 text-sm text-slate-300">${contact.phone}</td>
+          <td class="px-6 py-4">
+            <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">${contact.tags || 'Sem tag'}</span>
+          </td>
+          <td class="px-6 py-4 text-sm text-slate-400">${formatDate(contact.lastInteraction)}</td>
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-2">
+              <button onclick="editContact('${contact.__backendId}')" class="p-2 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-white transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                </svg>
+              </button>
+              <button onclick="deleteContact('${contact.__backendId}')" class="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                </svg>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function renderAutomations() {
+      const container = document.getElementById('automations-list');
+      if (!container) return;
+
+      if (automations.length === 0) {
+        container.innerHTML = `
+          <div class="glass-card rounded-2xl p-12 text-center">
+            <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+            </svg>
+            <p class="text-slate-400">Nenhuma automação configurada</p>
+            <p class="text-sm text-slate-500 mt-1">Clique em "Nova Automação" para criar</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = automations.map(auto => `
+        <div class="glass-card rounded-2xl p-5 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl ${auto.isActive ? 'bg-green-500/20' : 'bg-slate-600/20'} flex items-center justify-center">
+              <svg class="w-6 h-6 ${auto.isActive ? 'text-green-400' : 'text-slate-400'}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <p class="font-medium text-white">Palavra-chave: "${auto.keyword}"</p>
+                <span class="text-xs ${auto.isActive ? 'bg-green-500/20 text-green-400' : 'bg-slate-600/20 text-slate-400'} px-2 py-0.5 rounded-full">
+                  ${auto.isActive ? 'Ativo' : 'Inativo'}
+                </span>
+              </div>
+              <p class="text-sm text-slate-400 mt-1">${auto.response}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="toggleAutomation('${auto.__backendId}')" class="p-2 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-white transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${auto.isActive ? 'M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z' : 'M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+              </svg>
+            </button>
+            <button onclick="deleteAutomation('${auto.__backendId}')" class="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderKnowledge() {
+      const container = document.getElementById('knowledge-list');
+      if (!container) return;
+
+      if (knowledgeBase.length === 0) {
+        container.innerHTML = `
+          <div class="p-12 text-center">
+            <svg class="w-12 h-12 mx-auto mb-3 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+            </svg>
+            <p class="text-slate-400">Base de conhecimento vazia</p>
+            <p class="text-sm text-slate-500 mt-1">Adicione perguntas e respostas para treinar a IA</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = knowledgeBase.map(item => `
+        <div class="p-4 hover:bg-slate-700/30 transition-colors">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded-full">${item.category || 'Geral'}</span>
+              </div>
+              <p class="text-sm font-medium text-white mb-1">❓ ${item.question}</p>
+              <p class="text-sm text-slate-400">💬 ${item.answer}</p>
+            </div>
+            <button onclick="deleteKnowledge('${item.__backendId}')" class="p-2 rounded-lg hover:bg-red-500/20 text-slate-400 hover:text-red-400 transition-colors flex-shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updateKnowledgeCount() {
+      const counter = document.getElementById('knowledge-count');
+      if (counter) {
+        counter.textContent = knowledgeBase.length;
+      }
+    }
+
+    // Modal Functions
+    function openModal(content) {
+      document.getElementById('modal-content').innerHTML = content;
+      document.getElementById('modal-overlay').classList.remove('hidden');
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.add('hidden');
+    }
+
+    function openAddContactModal() {
+      openModal(`
+        <h3 class="text-lg font-semibold text-white mb-4">Novo Contato</h3>
+        <form onsubmit="addContact(event)">
+          <div class="space-y-4">
+            <div>
+              <label for="contact-name" class="block text-sm text-slate-400 mb-2">Nome</label>
+              <input type="text" id="contact-name" required placeholder="Nome completo" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
+            </div>
+            <div>
+              <label for="contact-phone" class="block text-sm text-slate-400 mb-2">Telefone</label>
+              <input type="tel" id="contact-phone" required placeholder="+55 11 99999-9999" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
+            </div>
+            <div>
+              <label for="contact-email" class="block text-sm text-slate-400 mb-2">Email</label>
+              <input type="email" id="contact-email" placeholder="email@exemplo.com" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
+            </div>
+            <div>
+              <label for="contact-tags" class="block text-sm text-slate-400 mb-2">Tags</label>
+              <select id="contact-tags" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500">
+                <option value="🔥 Hot Lead">🔥 Hot Lead</option>
+                <option value="💬 Em Negociação">💬 Em Negociação</option>
+                <option value="✅ Cliente">✅ Cliente</option>
+                <option value="❄️ Cold Lead">❄️ Cold Lead</option>
+              </select>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 bg-slate-700/50 hover:bg-slate-600/50 text-white rounded-xl font-medium transition-all">Cancelar</button>
+            <button type="submit" class="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-medium transition-all">Salvar</button>
+          </div>
+        </form>
+      `);
+    }
+
+    function openAddAutomationModal() {
+      openModal(`
+        <h3 class="text-lg font-semibold text-white mb-4">Nova Automação</h3>
+        <form onsubmit="addAutomation(event)">
+          <div class="space-y-4">
+            <div>
+              <label for="auto-keyword" class="block text-sm text-slate-400 mb-2">Palavra-chave</label>
+              <input type="text" id="auto-keyword" required placeholder="Ex: preço, horário, endereço" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
+            </div>
+            <div>
+              <label for="auto-response" class="block text-sm text-slate-400 mb-2">Resposta Automática</label>
+              <textarea id="auto-response" required rows="4" placeholder="Digite a resposta que será enviada..." class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500 resize-none"></textarea>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 bg-slate-700/50 hover:bg-slate-600/50 text-white rounded-xl font-medium transition-all">Cancelar</button>
+            <button type="submit" class="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl font-medium transition-all">Criar</button>
+          </div>
+        </form>
+      `);
+    }
+
+    function openAddKnowledgeModal() {
+      openModal(`
+        <h3 class="text-lg font-semibold text-white mb-4">Adicionar Conhecimento</h3>
+        <form onsubmit="addKnowledge(event)">
+          <div class="space-y-4">
+            <div>
+              <label for="kb-category" class="block text-sm text-slate-400 mb-2">Categoria</label>
+              <select id="kb-category" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-purple-500">
+                <option value="Geral">Geral</option>
+                <option value="Produtos">Produtos</option>
+                <option value="Serviços">Serviços</option>
+                <option value="Preços">Preços</option>
+                <option value="Suporte">Suporte</option>
+              </select>
+            </div>
+            <div>
+              <label for="kb-question" class="block text-sm text-slate-400 mb-2">Pergunta</label>
+              <input type="text" id="kb-question" required placeholder="Qual a pergunta frequente?" class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-purple-500">
+            </div>
+            <div>
+              <label for="kb-answer" class="block text-sm text-slate-400 mb-2">Resposta</label>
+              <textarea id="kb-answer" required rows="4" placeholder="Digite a resposta ideal..." class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-purple-500 resize-none"></textarea>
+            </div>
+          </div>
+          <div class="flex gap-3 mt-6">
+            <button type="button" onclick="closeModal()" class="flex-1 px-4 py-3 bg-slate-700/50 hover:bg-slate-600/50 text-white rounded-xl font-medium transition-all">Cancelar</button>
+            <button type="submit" class="flex-1 px-4 py-3 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white rounded-xl font-medium transition-all">Adicionar</button>
+          </div>
+        </form>
+      `);
+    }
+
+    // CRUD Operations
+    async function addContact(event) {
+      event.preventDefault();
+      if (isLoading) return;
+
+      const totalRecords = contacts.length + automations.length + knowledgeBase.length;
+      if (totalRecords >= 999) {
+        showToast('Limite de 999 registros atingido', 'error');
+        return;
+      }
+
+      isLoading = true;
+      const record = {
+        type: 'contact',
+        name: document.getElementById('contact-name').value,
+        phone: document.getElementById('contact-phone').value,
+        email: document.getElementById('contact-email').value,
+        tags: document.getElementById('contact-tags').value,
+        notes: '',
+        lastMessage: '',
+        lastInteraction: new Date().toISOString(),
+        status: 'active',
+        createdAt: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(record);
+      isLoading = false;
+
+      if (result.isOk) {
+        showToast('Contato adicionado com sucesso!', 'success');
+        closeModal();
+      } else {
+        showToast('Erro ao adicionar contato', 'error');
+      }
+    }
+
+    async function addAutomation(event) {
+      event.preventDefault();
+      if (isLoading) return;
+
+      const totalRecords = contacts.length + automations.length + knowledgeBase.length;
+      if (totalRecords >= 999) {
+        showToast('Limite de 999 registros atingido', 'error');
+        return;
+      }
+
+      isLoading = true;
+      const record = {
+        type: 'automation',
+        keyword: document.getElementById('auto-keyword').value,
+        response: document.getElementById('auto-response').value,
+        isActive: true,
+        createdAt: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(record);
+      isLoading = false;
+
+      if (result.isOk) {
+        showToast('Automação criada com sucesso!', 'success');
+        closeModal();
+      } else {
+        showToast('Erro ao criar automação', 'error');
+      }
+    }
+
+    async function addKnowledge(event) {
+      event.preventDefault();
+      if (isLoading) return;
+
+      const totalRecords = contacts.length + automations.length + knowledgeBase.length;
+      if (totalRecords >= 999) {
+        showToast('Limite de 999 registros atingido', 'error');
+        return;
+      }
+
+      isLoading = true;
+      const record = {
+        type: 'knowledge',
+        category: document.getElementById('kb-category').value,
+        question: document.getElementById('kb-question').value,
+        answer: document.getElementById('kb-answer').value,
+        createdAt: new Date().toISOString()
+      };
+
+      const result = await window.dataSdk.create(record);
+      isLoading = false;
+
+      if (result.isOk) {
+        showToast('Conhecimento adicionado!', 'success');
+        closeModal();
+      } else {
+        showToast('Erro ao adicionar conhecimento', 'error');
+      }
+    }
+
+    async function deleteContact(id) {
+      const contact = contacts.find(c => c.__backendId === id);
+      if (!contact) return;
+
+      openModal(`
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+            <svg class="w-8 h-8 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+            </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-white mb-2">Excluir Contato?</h3>
+          <p class="text-slate-400 mb-6">Tem certeza que deseja excluir "${contact.name}"?</p>
+          <div class="flex gap-3">
+            <button onclick="closeModal()" class="flex-1 px-4 py-3 bg-slate-700/50 hover:bg-slate-600/50 text-white rounded-xl font-medium transition-all">Cancelar</button>
+            <button onclick="confirmDeleteContact('${id}')" class="flex-1 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium transition-all">Excluir</button>
+          </div>
+        </div>
+      `);
+    }
+
+    async function confirmDeleteContact(id) {
+      const contact = contacts.find(c => c.__backendId === id);
+      if (!contact || isLoading) return;
+
+      isLoading = true;
+      const result = await window.dataSdk.delete(contact);
+      isLoading = false;
+
+      if (result.isOk) {
+        showToast('Contato excluído!', 'success');
+        closeModal();
+      } else {
+        showToast('Erro ao excluir contato', 'error');
+      }
+    }
+
+    async function toggleAutomation(id) {
+      const automation = automations.find(a => a.__backendId === id);
+      if (!automation || isLoading) return;
+
+      isLoading = true;
+      automation.isActive = !automation.isActive;
+      const result = await window.dataSdk.update(automation);
+      isLoading = false;
+
+      if (result.isOk) {
+        showToast(`Automação ${automation.isActive ? 'ativada' : 'desativada'}!`, 'success');
+      } else {
+        showToast('Erro ao atualizar automação', 'error');
+      }
+    }
+
+    async function deleteAutomation(id) {
+      const automation = automations.find(a => a.__backendId === id);
+      if (!automation || isLoading) return;
+
+      isLoading = true;
+      const result = await window.dataSdk.delete(automation);
+      isLoading = false;
+
+      if (result.isOk) {
+        showToast('Automação excluída!', 'success');
+      } else {
+        showToast('Erro ao excluir automação', 'error');
+      }
+    }
+
+    async function deleteKnowledge(id) {
+      const item = knowledgeBase.find(k => k.__backendId === id);
+      if (!item || isLoading) return;
+
+      isLoading = true;
+      const result = await window.dataSdk.delete(item);
+      isLoading = false;
+
+      if (result.isOk) {
+        showToast('Conhecimento removido!', 'success');
+      } else {
+        showToast('Erro ao remover conhecimento', 'error');
+      }
+    }
+
+    // WhatsApp Integration Logic
+    async function handleWhatsAppConnect() {
+      isLoading = true;
+      document.getElementById('btn-wa-connect').disabled = true;
+      document.getElementById('btn-wa-connect').innerHTML = `
+        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg> Processando...
+      `;
+
+      try {
+        const response = await fetch('/api/whatsapp/connect', { method: 'POST' });
+
+        const data = await response.json();
+        if (response.ok) {
+          showToast('Gerando QR Code. Aguarde...', 'success');
+          startStatusPolling();
+        } else {
+          showToast(data.error || 'Erro ao conectar', 'error');
+          resetConnectBtn();
+        }
+      } catch (err) {
+        showToast('Erro de rede ao conectar', 'error');
+        resetConnectBtn();
+      }
+      isLoading = false;
+    }
+
+    async function handleWhatsAppDisconnect() {
+      if (!confirm('Deseja realmente desconectar o WhatsApp? A sessão será encerrada.')) return;
+
+      try {
+        const response = await fetch('/api/whatsapp/disconnect', { method: 'POST' });
+        if (response.ok) {
+          showToast('WhatsApp desconectado com sucesso', 'success');
+          // Reset UI
+          document.getElementById('wa-connected-ui').classList.add('hidden');
+          document.getElementById('wa-pairing-ui').classList.add('hidden');
+          document.getElementById('wa-connection-ui').classList.remove('hidden');
+          resetConnectBtn();
+        } else {
+          showToast('Erro ao desconectar', 'error');
+        }
+      } catch (err) {
+        showToast('Erro de rede ao desconectar', 'error');
+      }
+    }
+
+    function resetConnectBtn() {
+      const btn = document.getElementById('btn-wa-connect');
+      btn.disabled = false;
+      btn.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg> Gerar QR Code
+      `;
+    }
+
+    let statusInterval = null;
+    function startStatusPolling() {
+      if (statusInterval) clearInterval(statusInterval);
+
+      statusInterval = setInterval(async () => {
+        try {
+          const response = await fetch('/api/whatsapp/status');
+          const data = await response.json();
+
+          const pairingUI = document.getElementById('wa-pairing-ui');
+          const connectedUI = document.getElementById('wa-connected-ui');
+          const connectionUI = document.getElementById('wa-connection-ui');
+          const qrImg = document.getElementById('wa-qr-img');
+
+          if (data.status === 'open') {
+            connectedUI.classList.remove('hidden');
+            pairingUI.classList.add('hidden');
+            connectionUI.classList.add('hidden');
+            clearInterval(statusInterval);
+            showToast('Conectado!', 'success');
+          } else {
+            const qrRes = await fetch('/api/whatsapp/qr');
+            const qrData = await qrRes.json();
+            if (qrData.qr) {
+              pairingUI.classList.remove('hidden');
+              connectionUI.classList.add('hidden');
+              qrImg.src = qrData.qr;
+            }
+          }
+        } catch (err) {
+          console.error('Polling error:', err);
+        }
+      }, 3000);
+    }
+
+    // Initialize state
+    startStatusPolling();
+
+    // Utility Functions
+    function getInitials(name) {
+      return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+    }
+
+    function formatDate(dateString) {
+      if (!dateString) return '-';
+      const date = new Date(dateString);
+      return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    }
+
+    function copyWebhook() {
+      navigator.clipboard.writeText('https://app.smartatende.ai/webhook/usr_abc123xyz');
+      showToast('Webhook copiado!', 'success');
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      const bgColor = type === 'success' ? 'bg-green-500' : type === 'error' ? 'bg-red-500' : 'bg-blue-500';
+
+      toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg flex items-center gap-2 slide-in`;
+      toast.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${type === 'success' ? 'M5 13l4 4L19 7' : type === 'error' ? 'M6 18L18 6M6 6l12 12' : 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'}"/>
+        </svg>
+        <span class="text-sm font-medium">${message}</span>
+      `;
+
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Close modal on overlay click
+    document.getElementById('modal-overlay').addEventListener('click', (e) => {
+      if (e.target.id === 'modal-overlay') closeModal();
+    });
+
+    // Temperature slider
+    document.getElementById('ai-temperature')?.addEventListener('input', (e) => {
+      document.getElementById('temp-value').textContent = e.target.value;
+    });
+
+    // Save AI Settings
+    async function saveAISettings() {
+      const btn = document.getElementById('btn-save-ai');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Salvando...`;
+
+      const apiKey = document.getElementById('openrouter-key').value;
+      const model = document.getElementById('ai-model').value;
+      const temperature = document.getElementById('ai-temperature').value;
+      const systemPrompt = document.getElementById('system-prompt').value;
+
+      // Simulate API call to save settings
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      // Send to Backend
+      try {
+        await fetch('/api/settings/ai', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ apiKey, model, temperature, systemPrompt })
+        });
+      } catch (e) {
+        console.error("Erro ao salvar config IA no backend:", e);
+      }
+
+      showToast('Configurações da IA salvas com sucesso!', 'success');
+
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+
+    // Save Webhook Settings
+    async function saveWebhookSettings() {
+      const btn = document.getElementById('btn-save-webhook');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Salvando...`;
+
+      const webhookUrl = document.getElementById('webhook-url').value;
+
+      // Simulate API call to save settings
+      await new Promise(resolve => setTimeout(resolve, 800));
+
+      localStorage.setItem('webhook_settings', JSON.stringify({
+        url: webhookUrl
+      }));
+
+      // In a real scenario, you would send this URL to your Node.js backend to configure Axios requests
+      try {
+        await fetch('/api/webhook/config', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ webhookUrl })
+        });
+      } catch (e) {
+        console.error("Erro ao enviar webhook config pro backend:", e);
+      }
+
+      showToast('Webhook salvo com sucesso!', 'success');
+
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }
+
+    // --- Chat Real-Time Logic ---
+    let allChats = [];
+    let activeChatJid = null;
+    let chatWs = null;
+
+    function initChatWebSocket() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      chatWs = new WebSocket(`${protocol}//${window.location.host}`);
+
+      chatWs.onopen = () => console.log('✅ Conectado ao servidor de chat');
+
+      chatWs.onmessage = (event) => {
+        try {
+          const message = JSON.parse(event.data);
+          if (message.type === 'init_chats') {
+            allChats = message.data;
+            renderChatList();
+          } else if (message.type === 'new_message') {
+            handleNewIncomingMessage(message.data);
+          } else if (message.type === 'new_appointment') {
+            appointmentsList.push(message.data);
+            renderAppointments();
+            showToast('Novo agendamento capturado!', 'success');
+          }
+        } catch (e) {
+          console.error('Erro ao processar mensagem WS:', e);
+        }
+      };
+
+      chatWs.onclose = () => {
+        console.log('❌ Conexão de chat perdida. Tentando reconectar...');
+        setTimeout(initChatWebSocket, 3000);
+      };
+    }
+
+    function renderChatList() {
+      const container = document.getElementById('chat-list');
+      if (!container) return;
+
+      if (allChats.length === 0) {
+        container.innerHTML = `<div class="p-8 text-center text-slate-500"><p class="text-sm">Nenhuma conversa ativa</p></div>`;
+        return;
+      }
+
+      // Ordena por data da última mensagem
+      allChats.sort((a, b) => {
+        const lastA = a.messages[a.messages.length - 1]?.timestamp || 0;
+        const lastB = b.messages[b.messages.length - 1]?.timestamp || 0;
+        return lastB - lastA;
+      });
+
+      container.innerHTML = allChats.map(chat => {
+        const lastMsg = chat.messages[chat.messages.length - 1];
+        const isActive = activeChatJid === chat.jid;
+        const name = chat.jid.split('@')[0];
+
+        return `
+          <div onclick="selectChat('${chat.jid}')" class="chat-list-item p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-800/50 transition-all ${isActive ? 'active' : ''}">
+            <div class="w-12 h-12 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold flex-shrink-0">
+               ${name.substring(0, 1).toUpperCase()}
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="flex justify-between items-baseline mb-1">
+                <p class="font-medium text-white truncate">${name}</p>
+                <span class="text-[10px] text-slate-500">${formatTimestamp(lastMsg?.timestamp)}</span>
+              </div>
+              <p class="text-sm text-slate-400 truncate">${lastMsg ? (lastMsg.fromMe ? 'Você: ' : '') + lastMsg.text : 'Sem mensagens'}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectChat(jid) {
+      activeChatJid = jid;
+      renderChatList();
+
+      const chat = allChats.find(c => c.jid === jid);
+      if (!chat) return;
+
+      document.getElementById('chat-header').classList.remove('hidden');
+      document.getElementById('chat-input-area').classList.remove('hidden');
+      document.getElementById('active-chat-name').textContent = jid.split('@')[0];
+      document.getElementById('active-chat-avatar').textContent = jid.charAt(0).toUpperCase();
+
+      renderMessages(chat.messages);
+    }
+
+    function renderMessages(messages) {
+      const container = document.getElementById('message-list');
+      if (!container) return;
+
+      container.innerHTML = messages.map(msg => `
+        <div class="flex ${msg.fromMe ? 'justify-end' : 'justify-start'} fade-in">
+          <div class="message-bubble ${msg.fromMe ? 'message-sent' : 'message-received'} shadow-lg">
+            <p class="text-sm">${msg.text}</p>
+            <p class="text-[10px] opacity-50 mt-1 text-right">${formatTimestamp(msg.timestamp)}</p>
+          </div>
+        </div>
+      `).join('');
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function handleNewIncomingMessage(newMsg) {
+      let chat = allChats.find(c => c.jid === newMsg.remoteJid);
+      if (!chat) {
+        chat = { jid: newMsg.remoteJid, messages: [] };
+        allChats.push(chat);
+      }
+      chat.messages.push(newMsg);
+      if (chat.messages.length > 50) chat.messages.shift();
+
+      renderChatList();
+      if (activeChatJid === newMsg.remoteJid) {
+        renderMessages(chat.messages);
+      }
+    }
+
+    async function sendManualMessage() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text || !activeChatJid) return;
+
+      input.value = '';
+      try {
+        const response = await fetch('/api/whatsapp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ jid: activeChatJid, text })
+        });
+        if (!response.ok) showToast('Erro ao enviar mensagem', 'error');
+      } catch (e) {
+        showToast('Erro de rede ao enviar', 'error');
+      }
+    }
+
+    // --- Agenda Logic ---
+    let appointmentsList = [];
+
+    async function loadAppointments() {
+      try {
+        const response = await fetch('/api/appointments');
+        if (response.ok) {
+          appointmentsList = await response.json();
+          renderAppointments();
+        }
+      } catch (e) {
+        console.error("Erro ao carregar agenda:", e);
+      }
+    }
+
+    function renderAppointments() {
+      const container = document.getElementById('appointments-list');
+      if (!container) return;
+
+      if (appointmentsList.length === 0) {
+        container.innerHTML = `
+                <div class="col-span-full p-12 glass-card rounded-2xl text-center">
+                    <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <p class="text-slate-400">Nenhum agendamento encontrado</p>
+                </div>
+            `;
+        return;
+      }
+
+      // Sort by date/time
+      const sorted = [...appointmentsList].sort((a, b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
+
+      container.innerHTML = sorted.map(app => `
+            <div class="glass-card rounded-2xl p-5 fade-in border-l-4 border-green-500">
+                <div class="flex justify-between items-start mb-4">
+                    <div class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center text-white font-bold">
+                        ${(app.userName || '?').charAt(0).toUpperCase()}
+                    </div>
+                    <span class="text-[10px] bg-green-500/20 text-green-400 px-2 py-1 rounded-full uppercase font-bold">
+                        ${app.status || 'Confirmado'}
+                    </span>
+                </div>
+                <h4 class="font-bold text-white mb-1">${app.userName || app.userPhone}</h4>
+                <p class="text-xs text-slate-400 mb-4">${app.service || 'Serviço não especificado'}</p>
+                
+                <div class="flex items-center gap-4 text-sm text-slate-300 mb-4">
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        ${app.date}
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        ${app.time}
+                    </div>
+                </div>
+                
+                <div class="pt-4 border-t border-slate-700/50 flex justify-between">
+                    <button onclick="deleteAppointment('${app.id}')" class="text-xs text-red-400 hover:text-red-300 transition-all">Excluir</button>
+                    <button onclick="selectChat('${app.userPhone}')" class="text-xs text-green-400 hover:text-green-300 transition-all">Ver Conversa</button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function deleteAppointment(id) {
+      if (!confirm("Deseja realmente excluir este agendamento?")) return;
+      try {
+        const response = await fetch(`/api/appointments/${id}`, { method: 'DELETE' });
+        if (response.ok) {
+          appointmentsList = appointmentsList.filter(a => a.id !== id);
+          renderAppointments();
+          showToast('Agendamento removido', 'success');
+        }
+      } catch (e) {
+        console.error("Erro ao deletar:", e);
+      }
+    }
+
+    function formatTimestamp(ts) {
+      if (!ts) return '';
+      const date = new Date(ts * 1000);
+      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    }
+
+    // Initialize logic
+    async function loadSavedSettings() {
+      initChatWebSocket();
+      // Load Webhook Config
+      const savedWebhook = localStorage.getItem('webhook_settings');
+      if (savedWebhook) {
+        try {
+          const config = JSON.parse(savedWebhook);
+          if (config.url) document.getElementById('webhook-url').value = config.url;
+        } catch (e) { }
+      }
+
+      // Load AI Config
+      try {
+        const response = await fetch('/api/settings/ai');
+        if (response.ok) {
+          const data = await response.json();
+          if (data.apiKey) document.getElementById('openrouter-key').value = data.apiKey;
+          if (data.model) document.getElementById('ai-model').value = data.model;
+          if (data.temperature) {
+            document.getElementById('ai-temperature').value = data.temperature;
+            document.getElementById('temp-value').textContent = data.temperature;
+          }
+          if (data.systemPrompt) document.getElementById('system-prompt').value = data.systemPrompt;
+        }
+      } catch (e) {
+        console.error("Erro ao carregar configurações da IA:", e);
+      }
+    }
+
+    loadSavedSettings();
+    renderContacts();
+    renderAutomations();
+    renderKnowledge();
+  </script>
+</body>
+
+</html>

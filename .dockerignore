@@ -1,0 +1,10 @@
+node_modules
+.env
+baileys_auth_info
+appointments.json
+ai_settings.json
+npm-debug.log
+Dockerfile
+docker-compose.yml
+.git
+.gitignore
