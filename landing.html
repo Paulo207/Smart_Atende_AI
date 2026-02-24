@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartAtende AI - O Futuro do Atendimento</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/atropos@2.0.2/atropos.css">
+
+    <style>
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: #0f172a;
+            /* Slate 900 */
+            color: #f8fafc;
+            overflow-x: hidden;
+            perspective: 1000px;
+        }
+
+        .gradient-text {
+            background: linear-gradient(to right, #4ade80, #3b82f6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .blob {
+            position: absolute;
+            background: radial-gradient(circle, rgba(34, 197, 94, 0.4), transparent 60%);
+            filter: blur(80px);
+            z-index: -1;
+            border-radius: 50%;
+            animation: floatBlob 15s infinite alternate ease-in-out;
+        }
+
+        .blob-purple {
+            background: radial-gradient(circle, rgba(168, 85, 247, 0.3), transparent 60%);
+            animation-delay: -5s;
+        }
+
+        @keyframes floatBlob {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            50% {
+                transform: translate(100px, 50px) scale(1.2);
+            }
+
+            100% {
+                transform: translate(-50px, 100px) scale(0.8);
+            }
+        }
+
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* 3D Hero Elements */
+        .hero-3d-container {
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateContinuous 20s linear infinite;
+        }
+
+        .cube {
+            width: 100px;
+            height: 100px;
+            position: absolute;
+            transform-style: preserve-3d;
+        }
+
+        .cube-face {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.5);
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .front {
+            transform: rotateY(0deg) translateZ(50px);
+        }
+
+        .back {
+            transform: rotateY(180deg) translateZ(50px);
+        }
+
+        .right {
+            transform: rotateY(90deg) translateZ(50px);
+        }
+
+        .left {
+            transform: rotateY(-90deg) translateZ(50px);
+        }
+
+        .top {
+            transform: rotateX(90deg) translateZ(50px);
+        }
+
+        .bottom {
+            transform: rotateX(-90deg) translateZ(50px);
+        }
+
+        @keyframes rotateContinuous {
+            0% {
+                transform: rotateX(0deg) rotateY(0deg);
+            }
+
+            100% {
+                transform: rotateX(360deg) rotateY(360deg);
+            }
+        }
+
+        /* Atropos Card Customization */
+        .my-atropos {
+            width: 100%;
+            height: 100%;
+            border-radius: 1.5rem;
+        }
+
+        .atropos-inner {
+            border-radius: 1.5rem;
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+        }
+
+        .atropos-highlight {
+            border-radius: 1.5rem;
+        }
+
+        .feature-icon-wrapper {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(59, 130, 246, 0.2));
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.2);
+        }
+    </style>
+</head>
+
+<body class="antialiased">
+
+    <!-- Background Blobs -->
+    <div class="blob w-[600px] h-[600px] top-[-200px] left-[-200px]"></div>
+    <div class="blob blob-purple w-[500px] h-[500px] top-[40%] right-[-100px]"></div>
+    <div class="blob w-[400px] h-[400px] bottom-[-100px] left-[20%]"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-nav">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center shadow-lg shadow-green-500/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                </div>
+                <span class="text-xl font-bold tracking-tight">SmartAtende<span class="text-green-400">.AI</span></span>
+            </div>
+            <div class="flex gap-4">
+                <a href="#features"
+                    class="hidden md:flex flex-col justify-center text-sm font-medium text-slate-300 hover:text-white transition">Funcionalidades</a>
+                <a href="/login"
+                    class="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/10 text-white font-medium transition backdrop-blur-md">Acessar
+                    Painel</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative pt-40 pb-20 lg:pt-48 lg:pb-32 overflow-hidden flex flex-col items-center text-center px-4">
+
+        <!-- 3D Decorative Element (Hero) -->
+        <div class="absolute top-1/4 right-1/4 lg:right-1/3 opacity-30 md:opacity-60 pointer-events-none">
+            <div class="hero-3d-container">
+                <div class="cube" style="transform: scale(2) rotateX(45deg) rotateY(45deg);">
+                    <div class="cube-face front"></div>
+                    <div class="cube-face back"></div>
+                    <div class="cube-face right"></div>
+                    <div class="cube-face left"></div>
+                    <div class="cube-face top"></div>
+                    <div class="cube-face bottom"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="max-w-4xl relative z-10">
+            <div
+                class="inline-block mb-6 px-4 py-1.5 rounded-full border border-green-500/30 bg-green-500/10 backdrop-blur-md">
+                <span class="text-green-400 font-medium text-sm">🚀 A Evolução da Automação no WhatsApp</span>
+            </div>
+            <h1 class="text-5xl md:text-7xl font-extrabold tracking-tight mb-8 leading-tight">
+                Transforme seu WhatsApp em uma <br class="hidden lg:block" />
+                <span class="gradient-text">Máquina de Vendas Autônoma</span>
+            </h1>
+            <p class="text-lg md:text-xl text-slate-400 mb-10 max-w-2xl mx-auto leading-relaxed">
+                Esqueça integrações complexas e APIs caras. Conecte seu número via QR Code oficial, treine sua
+                Inteligência Artificial e deixe ela vender, agendar e responder por você 24h por dia.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/login"
+                    class="px-8 py-4 rounded-full bg-gradient-to-r from-green-500 to-blue-600 text-white font-bold text-lg shadow-[0_0_40px_rgba(74,222,128,0.4)] hover:shadow-[0_0_60px_rgba(74,222,128,0.6)] transform hover:-translate-y-1 transition-all">
+                    Comece a Automatizar
+                </a>
+                <a href="#features"
+                    class="px-8 py-4 rounded-full bg-slate-800/80 border border-slate-700 text-white font-bold text-lg hover:bg-slate-700 transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                    Ver Funcionalidades
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3D Features Showcase -->
+    <section id="features" class="py-24 relative z-10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-5xl font-bold mb-4">Tudo que você precisa em <span class="text-green-400">um
+                        só lugar</span></h2>
+                <p class="text-slate-400">Passe o mouse (ou toque) nos painéis interativos para explorar a tecnologia
+                    dimensional.</p>
+            </div>
+
+            <!-- Grids of Atropos 3D Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+                <!-- Feature 1 -->
+                <div class="atropos my-atropos h-[320px]">
+                    <div class="atropos-scale">
+                        <div class="atropos-rotate">
+                            <div class="atropos-inner p-8 flex flex-col justify-between group">
+                                <div class="feature-icon-wrapper w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
+                                    data-atropos-offset="5">
+                                    <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div data-atropos-offset="3">
+                                    <h3
+                                        class="text-2xl font-bold text-white mb-3 group-hover:text-green-400 transition-colors">
+                                        Conexão Nativa</h3>
+                                    <p class="text-slate-400 leading-relaxed">Chega de APIs não-oficiais caras. Escaneie
+                                        um único QR Code diretamente no painel e seu WhatsApp já estará conectado ao
+                                        nosso cérebro central.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="atropos my-atropos h-[320px]">
+                    <div class="atropos-scale">
+                        <div class="atropos-rotate">
+                            <div class="atropos-inner p-8 flex flex-col justify-between group">
+                                <div class="feature-icon-wrapper w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
+                                    data-atropos-offset="5">
+                                    <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div data-atropos-offset="3">
+                                    <h3
+                                        class="text-2xl font-bold text-white mb-3 group-hover:text-green-400 transition-colors">
+                                        Cérebro I.A</h3>
+                                    <p class="text-slate-400 leading-relaxed">Alimentado por OpenRouter. Escolha entre
+                                        Llama 3, Gemini Flash ou Mistral. A I.A entende a intenção do cliente, gera
+                                        respostas humanas e fecha negócios sozinha.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="atropos my-atropos h-[320px]">
+                    <div class="atropos-scale">
+                        <div class="atropos-rotate">
+                            <div class="atropos-inner p-8 flex flex-col justify-between group">
+                                <div class="feature-icon-wrapper w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
+                                    data-atropos-offset="5">
+                                    <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div data-atropos-offset="3">
+                                    <h3
+                                        class="text-2xl font-bold text-white mb-3 group-hover:text-green-400 transition-colors">
+                                        Base de Conhecimento</h3>
+                                    <p class="text-slate-400 leading-relaxed">Adicione regras de negócio, preços e FAQs.
+                                        A Inteligência Artificial busca nestes dados para dar respostas 100% alinhadas
+                                        com sua empresa.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="atropos my-atropos h-[320px]">
+                    <div class="atropos-scale">
+                        <div class="atropos-rotate">
+                            <div class="atropos-inner p-8 flex flex-col justify-between group">
+                                <div class="feature-icon-wrapper w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
+                                    data-atropos-offset="5">
+                                    <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div data-atropos-offset="3">
+                                    <h3
+                                        class="text-2xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
+                                        Agenda Autônoma</h3>
+                                    <p class="text-slate-400 leading-relaxed">A IA identifica a intenção de marcar
+                                        horários, coleta data e evento, e salva tudo diretamente no banco de dados e no
+                                        painel SmartAtende.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="atropos my-atropos h-[320px]">
+                    <div class="atropos-scale">
+                        <div class="atropos-rotate">
+                            <div class="atropos-inner p-8 flex flex-col justify-between group">
+                                <div class="feature-icon-wrapper w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
+                                    data-atropos-offset="5">
+                                    <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div data-atropos-offset="3">
+                                    <h3
+                                        class="text-2xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
+                                        CRM Integrado</h3>
+                                    <p class="text-slate-400 leading-relaxed">Todo novo contato que manda uma mensagem
+                                        vira automaticamente um "Lead" salvo no seu banco de dados, com histórico de
+                                        mensagens em tempo real.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="atropos my-atropos h-[320px]">
+                    <div class="atropos-scale">
+                        <div class="atropos-rotate">
+                            <div class="atropos-inner p-8 flex flex-col justify-between group">
+                                <div class="feature-icon-wrapper w-14 h-14 rounded-2xl flex items-center justify-center mb-6"
+                                    data-atropos-offset="5">
+                                    <svg class="w-7 h-7 text-blue-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                        </path>
+                                    </svg>
+                                </div>
+                                <div data-atropos-offset="3">
+                                    <h3
+                                        class="text-2xl font-bold text-white mb-3 group-hover:text-blue-400 transition-colors">
+                                        Webhooks Instantâneos</h3>
+                                    <p class="text-slate-400 leading-relaxed">Conecte o SmartAtende ao <span
+                                            class="text-white font-medium">n8n, Make ou Typebot</span>. Todos os eventos
+                                        (mensagens recebidas/enviadas) são disparados instantaneamente via Webhook.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- UI Preview Section -->
+    <section class="py-20 relative z-10 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="glass-nav rounded-3xl p-8 md:p-12 border border-slate-700/50 relative overflow-hidden group">
+                <!-- Abstract 3D elements inside banner -->
+                <div
+                    class="absolute right-0 top-0 w-64 h-64 bg-green-500/10 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2 transition-transform duration-700 group-hover:scale-150">
+                </div>
+                <div
+                    class="absolute left-0 bottom-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2 transition-transform duration-700 group-hover:scale-150">
+                </div>
+
+                <div class="relative z-10 flex flex-col lg:flex-row items-center gap-10">
+                    <div class="flex-1 text-center lg:text-left">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4">Painel Limpo, Rápido e Mobile-First</h2>
+                        <p class="text-slate-400 mb-8 max-w-lg mx-auto lg:mx-0">
+                            Uma interface estonteante (Glassmorphism) com dados em tempo real. Acompanhe relatórios,
+                            converse nos chats pelo "Modo Humano" e modifique configurações de sua IA da palma da sua
+                            mão.
+                        </p>
+                        <a href="/login"
+                            class="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-slate-900 font-bold hover:bg-slate-200 transition">
+                            Visitar Dashboard
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M14 5l7 7m0 0l-7-7m7-7H3" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div class="flex-1" style="perspective: 1000px;">
+                        <!-- UI Abstract Mockup translated dynamically -->
+                        <div
+                            class="w-full max-w-sm mx-auto bg-slate-900 border border-slate-700 rounded-2xl shadow-2xl overflow-hidden transform rotate-y-[-10deg] rotate-x-[5deg] hover:rotate-y-[0deg] hover:rotate-x-[0deg] transition-all duration-700 ease-out">
+                            <div class="bg-slate-800 p-3 flex gap-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="p-6">
+                                <div class="w-1/2 h-4 bg-slate-700 rounded mb-6"></div>
+                                <div class="grid grid-cols-2 gap-4 mb-6">
+                                    <div class="h-24 bg-green-500/20 rounded-xl border border-green-500/20"></div>
+                                    <div class="h-24 bg-blue-500/20 rounded-xl border border-blue-500/20"></div>
+                                </div>
+                                <div class="h-8 bg-slate-800 rounded"></div>
+                                <div class="space-y-3 mt-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+                                        <div class="flex-1 h-2 bg-slate-700 rounded"></div>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-slate-700"></div>
+                                        <div class="flex-1 h-2 bg-slate-700 rounded"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800/50 py-10 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <p class="text-slate-500 text-sm">© 2026 SmartAtende AI. Criado para escalar o atendimento inteligente da
+                sua empresa.</p>
+        </div>
+    </footer>
+
+    <!-- Atropos Library Script -->
+    <script src="https://cdn.jsdelivr.net/npm/atropos@2.0.2/atropos.js"></script>
+    <script>
+        // Initialize 3D Cards
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = document.querySelectorAll('.my-atropos');
+            elements.forEach((el) => {
+                Atropos({
+                    el: el,
+                    activeOffset: 40,
+                    shadowScale: 1.05,
+                    highlight: true,
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

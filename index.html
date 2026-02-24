@@ -148,9 +148,14 @@
 </head>
 
 <body class="h-full gradient-bg text-slate-100 font-sans overflow-hidden">
-  <div id="app" class="h-full flex">
+  <div id="app" class="h-full flex relative">
+    <!-- Mobile overlay -->
+    <div id="sidebar-overlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-40 hidden md:hidden"
+      onclick="toggleSidebar()"></div>
+
     <!-- Sidebar -->
-    <aside id="sidebar" class="w-64 glass-card border-r border-slate-700/50 flex flex-col">
+    <aside id="sidebar"
+      class="fixed inset-y-0 left-0 w-64 glass-card border-r border-slate-700/50 flex flex-col z-50 transform -translate-x-full transition-transform duration-300 md:relative md:translate-x-0 h-full">
       <!-- Logo -->
       <div class="p-6 border-b border-slate-700/50">
         <div class="flex items-center gap-3">
@@ -220,22 +225,31 @@
           </svg><span class="font-medium">Configurações</span> </button>
       </nav><!-- Connection Status -->
       <div class="p-4 border-t border-slate-700/50">
-        <div id="connection-status" class="glass-card rounded-xl p-4">
+        <div id="sidebar-connection-status" class="glass-card rounded-xl p-4">
           <div class="flex items-center gap-3 mb-3">
-            <div class="w-3 h-3 rounded-full bg-green-500 pulse-dot"></div><span
-              class="text-sm font-medium text-green-400">WhatsApp Conectado</span>
+            <div id="sidebar-status-dot" class="w-3 h-3 rounded-full bg-yellow-500 pulse-dot"></div><span
+              id="sidebar-status-text" class="text-sm font-medium text-yellow-400">Verificando...</span>
           </div>
-          <p class="text-xs text-slate-400">+55 11 99999-9999</p>
-          <p class="text-xs text-slate-500 mt-1">Instância: zapi_001</p>
+          <p class="text-xs text-slate-500 mt-1">Status da API Baileys</p>
         </div>
       </div>
     </aside><!-- Main Content -->
-    <main class="flex-1 flex flex-col overflow-hidden">
+    <main class="flex-1 flex flex-col overflow-hidden relative">
       <!-- Header -->
-      <header class="glass-card border-b border-slate-700/50 px-6 py-4 flex items-center justify-between">
-        <div>
-          <h2 id="page-title" class="text-xl font-bold text-white">Dashboard</h2>
-          <p id="welcome-text" class="text-sm text-slate-400">Bem-vindo ao painel de controle</p>
+      <header
+        class="glass-card border-b border-slate-700/50 px-4 sm:px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+        <div class="flex items-center gap-3 sm:gap-4">
+          <button onclick="toggleSidebar()"
+            class="md:hidden p-2 -ml-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700/50 transition-colors">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <div>
+            <h2 id="page-title" class="text-lg sm:text-xl font-bold text-white">Dashboard</h2>
+            <p id="welcome-text" class="text-xs sm:text-sm text-slate-400 hidden sm:block">Bem-vindo ao painel de
+              controle</p>
+          </div>
         </div>
         <div class="flex items-center gap-4">
           <button class="relative p-2 rounded-xl bg-slate-800/50 hover:bg-slate-700/50 transition-colors">
@@ -262,9 +276,9 @@
           </div>
         </div>
       </header><!-- Content Area -->
-      <div id="content-area" class="flex-1 overflow-y-auto p-6">
+      <div id="content-area" class="flex-1 overflow-y-auto p-6 flex flex-col items-stretch">
         <!-- Dashboard Tab -->
-        <div id="tab-dashboard" class="tab-content fade-in">
+        <div id="tab-dashboard" class="tab-content fade-in h-full w-full">
           <!-- Stats Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div class="glass-card rounded-2xl p-5">
@@ -406,11 +420,11 @@
           </div>
         </div>
 
-        <!-- Conversations Tab -->
         <div id="tab-conversations" class="tab-content hidden fade-in h-chat">
-          <div class="glass-card rounded-2xl overflow-hidden flex chat-container">
+          <div class="glass-card rounded-2xl overflow-hidden flex flex-col md:flex-row chat-container relative">
             <!-- Sidebar: Lista de Chats -->
-            <div class="w-80 border-r border-slate-700/50 flex flex-col bg-slate-900/30">
+            <div
+              class="w-full md:w-80 border-b md:border-b-0 md:border-r border-slate-700/50 flex flex-col bg-slate-900/30 h-[30vh] md:h-full shrink-0">
               <div class="p-4 border-b border-slate-700/50">
                 <h3 class="font-semibold text-white">Conversas Recentes</h3>
               </div>
@@ -465,493 +479,524 @@
           </div>
         </div>
 
-      </div>
-
-      <!-- Agenda Tab -->
-      <div id="tab-agenda" class="tab-content hidden fade-in">
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h3 class="text-xl font-bold text-white">Agenda de Marcações</h3>
-            <p class="text-slate-400 text-sm">Gerencie seus agendamentos confirmados</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="loadAppointments()"
-              class="p-2 bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-all">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="appointments-list">
-          <!-- Appointments will be rendered here -->
-          <div class="col-span-full p-12 glass-card rounded-2xl text-center">
-            <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+        <!-- Agenda Tab -->
+        <div id="tab-agenda" class="tab-content hidden fade-in">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="text-xl font-bold text-white">Agenda de Marcações</h3>
+              <p class="text-slate-400 text-sm">Gerencie seus agendamentos confirmados</p>
             </div>
-            <p class="text-slate-400">Nenhum agendamento encontrado</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Contacts Tab -->
-      <div id="tab-contacts" class="tab-content hidden fade-in">
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center gap-4">
-            <div class="relative">
-              <input type="text" placeholder="Buscar contatos..."
-                class="w-64 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 pl-10 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
-              <svg class="w-5 h-5 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor"
-                viewbox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div><select
-              class="bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-green-500">
-              <option>Todas as Tags</option>
-              <option>🔥 Hot Lead</option>
-              <option>💬 Em Negociação</option>
-              <option>✅ Cliente</option>
-            </select>
-          </div><button onclick="openAddContactModal()"
-            class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-xl font-medium transition-all glow-green">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg> Novo Contato </button>
-        </div>
-        <div class="glass-card rounded-2xl overflow-hidden">
-          <table class="w-full">
-            <thead class="bg-slate-800/50">
-              <tr>
-                <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Contato</th>
-                <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Telefone</th>
-                <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Tags</th>
-                <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Última Interação</th>
-                <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Ações</th>
-              </tr>
-            </thead>
-            <tbody id="contacts-list">
-              <!-- Contacts will be rendered here -->
-            </tbody>
-          </table>
-        </div>
-      </div><!-- Automation Tab -->
-      <div id="tab-automation" class="tab-content hidden fade-in">
-        <div class="flex items-center justify-between mb-6">
-          <h3 class="text-lg font-semibold text-white">Respostas Automáticas</h3><button
-            onclick="openAddAutomationModal()"
-            class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-xl font-medium transition-all glow-green">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg> Nova Automação </button>
-        </div>
-        <div id="automations-list" class="space-y-4">
-          <!-- Automations will be rendered here -->
-        </div>
-      </div><!-- Knowledge Base Tab -->
-      <div id="tab-knowledge" class="tab-content hidden fade-in">
-        <div class="flex items-center justify-between mb-6">
-          <div>
-            <h3 class="text-lg font-semibold text-white">Base de Conhecimento</h3>
-            <p class="text-sm text-slate-400">Treine a IA com perguntas e respostas</p>
-          </div><button onclick="openAddKnowledgeModal()"
-            class="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-4 py-2 rounded-xl font-medium transition-all glow-purple">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg> Adicionar Conhecimento </button>
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          <div class="glass-card rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
-                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-white" id="knowledge-count">0</p>
-                <p class="text-sm text-slate-400">Perguntas Treinadas</p>
-              </div>
-            </div>
-            <div class="w-full bg-slate-700 rounded-full h-2">
-              <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full" style="width: 45%"></div>
-            </div>
-            <p class="text-xs text-slate-400 mt-2">45% da capacidade utilizada</p>
-          </div>
-          <div class="glass-card rounded-2xl p-6">
-            <div class="flex items-center gap-3 mb-4">
-              <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <p class="text-2xl font-bold text-white">94%</p>
-                <p class="text-sm text-slate-400">Precisão de Respostas</p>
-              </div>
-            </div>
-            <div class="flex gap-2 mt-2">
-              <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">👍 234 úteis</span> <span
-                class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded-full">👎 14 não úteis</span>
-            </div>
-          </div>
-        </div>
-        <div class="glass-card rounded-2xl overflow-hidden">
-          <div class="p-4 border-b border-slate-700/50">
-            <input type="text" placeholder="Buscar na base de conhecimento..."
-              class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-purple-500">
-          </div>
-          <div id="knowledge-list" class="divide-y divide-slate-700/50">
-            <!-- Knowledge items will be rendered here -->
-          </div>
-        </div>
-      </div><!-- Webhook Tab -->
-      <div id="tab-webhook" class="tab-content hidden fade-in">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="glass-card rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">Webhook de Destino</h3>
-            <p class="text-sm text-slate-400 mb-4">Insira a URL do seu sistema (n8n, Make, Typebot) para receber os
-              eventos do WhatsApp em tempo real.</p>
-            <div class="space-y-4 mb-6">
-              <div>
-                <label for="webhook-url" class="block text-sm text-slate-400 mb-2">URL do Webhook</label>
-                <input type="url" id="webhook-url" placeholder="https://seu-n8n.com/webhook/..."
-                  class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
-              </div>
-              <button onclick="saveWebhookSettings()" id="btn-save-webhook"
-                class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-3 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/25">
+            <div class="flex gap-2">
+              <button onclick="loadAppointments()"
+                class="p-2 bg-slate-800 rounded-xl text-slate-400 hover:text-white transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                </svg> Salvar Webhook
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
               </button>
             </div>
-            <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl mb-4">
-              <div class="flex items-center gap-3">
-                <div class="w-3 h-3 rounded-full bg-green-500 pulse-dot"></div><span class="text-sm text-white">Webhook
-                  Ativo</span>
-              </div><label class="relative inline-flex items-center cursor-pointer"> <input type="checkbox" checked
-                  class="sr-only peer">
-                <div
-                  class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500">
-                </div>
-              </label>
-            </div>
-            <h4 class="text-sm font-medium text-white mb-3">Eventos Monitorados</h4>
-            <div class="space-y-2">
-              <label
-                class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl cursor-pointer hover:bg-slate-700/50 transition-colors">
-                <input type="checkbox" checked
-                  class="w-4 h-4 text-green-500 bg-slate-700 border-slate-600 rounded focus:ring-green-500"> <span
-                  class="text-sm text-white">Mensagem Recebida</span> </label> <label
-                class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl cursor-pointer hover:bg-slate-700/50 transition-colors">
-                <input type="checkbox" checked
-                  class="w-4 h-4 text-green-500 bg-slate-700 border-slate-600 rounded focus:ring-green-500"> <span
-                  class="text-sm text-white">Mensagem Enviada</span> </label> <label
-                class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl cursor-pointer hover:bg-slate-700/50 transition-colors">
-                <input type="checkbox"
-                  class="w-4 h-4 text-green-500 bg-slate-700 border-slate-600 rounded focus:ring-green-500"> <span
-                  class="text-sm text-white">Status de Conexão</span> </label>
-            </div>
           </div>
-          <div class="glass-card rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">Últimos Eventos</h3>
-            <div class="space-y-3 max-h-96 overflow-y-auto">
-              <div class="p-3 bg-slate-800/50 rounded-xl">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">message_received</span>
-                  <span class="text-xs text-slate-400">há 2 min</span>
-                </div><code
-                  class="text-xs text-slate-300 block overflow-hidden text-ellipsis">{"from": "+5511999999999", "body": "Olá!"}</code>
-              </div>
-              <div class="p-3 bg-slate-800/50 rounded-xl">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">message_sent</span> <span
-                    class="text-xs text-slate-400">há 5 min</span>
-                </div><code
-                  class="text-xs text-slate-300 block overflow-hidden text-ellipsis">{"to": "+5511999999999", "body": "Olá! Como posso ajudar?"}</code>
-              </div>
-              <div class="p-3 bg-slate-800/50 rounded-xl">
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded-full">connection_update</span>
-                  <span class="text-xs text-slate-400">há 1 hora</span>
-                </div><code
-                  class="text-xs text-slate-300 block overflow-hidden text-ellipsis">{"status": "connected"}</code>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div><!-- Conversations Tab -->
-      <div id="tab-conversations" class="tab-content hidden fade-in">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-          <!-- Conversation List -->
-          <div class="glass-card rounded-2xl overflow-hidden">
-            <div class="p-4 border-b border-slate-700/50">
-              <input type="text" placeholder="Buscar conversas..."
-                class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
-            </div>
-            <div class="divide-y divide-slate-700/50 max-h-[500px] overflow-y-auto">
-              <div class="p-4 hover:bg-slate-700/30 cursor-pointer bg-slate-700/20 border-l-4 border-green-500">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                    <span class="text-white font-bold">JS</span>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <p class="text-sm font-medium text-white truncate">João Silva</p><span
-                        class="text-xs text-slate-400">14:32</span>
-                    </div>
-                    <p class="text-xs text-slate-400 truncate">Olá, gostaria de saber mais sobre...</p>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 hover:bg-slate-700/30 cursor-pointer">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
-                    <span class="text-white font-bold">MC</span>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <p class="text-sm font-medium text-white truncate">Maria Costa</p><span
-                        class="text-xs text-slate-400">13:15</span>
-                    </div>
-                    <p class="text-xs text-slate-400 truncate">Obrigada pela informação!</p>
-                  </div>
-                </div>
-              </div>
-              <div class="p-4 hover:bg-slate-700/30 cursor-pointer">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
-                    <span class="text-white font-bold">PS</span>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center justify-between">
-                      <p class="text-sm font-medium text-white truncate">Pedro Santos</p><span
-                        class="text-xs text-slate-400">11:42</span>
-                    </div>
-                    <p class="text-xs text-slate-400 truncate">Qual o prazo de entrega?</p>
-                  </div><span
-                    class="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center text-xs text-white">2</span>
-                </div>
-              </div>
-            </div>
-          </div><!-- Chat View -->
-          <div class="lg:col-span-2 glass-card rounded-2xl flex flex-col overflow-hidden">
-            <div class="p-4 border-b border-slate-700/50 flex items-center justify-between">
-              <div class="flex items-center gap-3">
-                <div
-                  class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
-                  <span class="text-white font-bold">JS</span>
-                </div>
-                <div>
-                  <p class="font-medium text-white">João Silva</p>
-                  <p class="text-xs text-slate-400">+55 11 99999-9999</p>
-                </div>
-              </div>
-              <div class="flex items-center gap-2">
-                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">🔥 Hot Lead</span> <button
-                  class="p-2 rounded-xl hover:bg-slate-700/50 transition-colors">
-                  <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                  </svg></button>
-              </div>
-            </div>
-            <div class="flex-1 p-4 space-y-4 overflow-y-auto max-h-80">
-              <div class="flex justify-start">
-                <div class="max-w-xs bg-slate-700/50 rounded-2xl rounded-tl-none px-4 py-3">
-                  <p class="text-sm text-white">Olá, gostaria de saber mais sobre os planos do SmartAtende!</p><span
-                    class="text-xs text-slate-400 mt-1 block">14:30</span>
-                </div>
-              </div>
-              <div class="flex justify-end">
-                <div
-                  class="max-w-xs bg-gradient-to-r from-green-500 to-emerald-600 rounded-2xl rounded-tr-none px-4 py-3">
-                  <p class="text-sm text-white">Olá João! 👋 Temos planos a partir de R$97/mês. Qual funcionalidade é
-                    mais importante para você?</p>
-                  <div class="flex items-center justify-end gap-1 mt-1">
-                    <span class="text-xs text-green-200">14:31</span>
-                    <svg class="w-4 h-4 text-green-200" fill="currentColor" viewbox="0 0 24 24">
-                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                    </svg>
-                  </div>
-                </div>
-              </div>
-              <div class="flex justify-center">
-                <span class="text-xs bg-slate-700/50 text-slate-400 px-3 py-1 rounded-full">🤖 Resposta automática da
-                  IA</span>
-              </div>
-              <div class="flex justify-start">
-                <div class="max-w-xs bg-slate-700/50 rounded-2xl rounded-tl-none px-4 py-3">
-                  <p class="text-sm text-white">Preciso de automação de respostas e integração com meu CRM</p><span
-                    class="text-xs text-slate-400 mt-1 block">14:32</span>
-                </div>
-              </div>
-            </div>
-            <div class="p-4 border-t border-slate-700/50">
-              <div class="flex items-center gap-3">
-                <button class="p-2 rounded-xl hover:bg-slate-700/50 transition-colors">
-                  <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                  </svg></button> <input type="text" placeholder="Digite sua mensagem..."
-                  class="flex-1 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
-                <button
-                  class="p-2 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 transition-all">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                  </svg></button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div><!-- Settings Tab -->
-      <div id="tab-settings" class="tab-content hidden fade-in">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div class="glass-card rounded-2xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-4">Conexão WhatsApp (Baileys)</h3>
-            <div id="wa-connection-ui" class="space-y-4">
-              <p class="text-sm text-slate-400 mb-4">O WhatsApp será conectado via QR Code oficial.</p>
-              <button onclick="handleWhatsAppConnect()" id="btn-wa-connect"
-                class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-medium transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="appointments-list">
+            <!-- Appointments will be rendered here -->
+            <div class="col-span-full p-12 glass-card rounded-2xl text-center">
+              <div class="w-16 h-16 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg class="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
-                </svg> Gerar QR Code </button>
-            </div>
-
-            <div id="wa-pairing-ui"
-              class="hidden mt-6 p-6 bg-white rounded-2xl border border-green-500/30 text-center fade-in">
-              <div class="aspect-square max-w-64 mx-auto flex items-center justify-center p-2">
-                <img id="wa-qr-img" src="" alt="Aguardando QR Code..."
-                  class="w-full h-full object-contain mix-blend-multiply">
-              </div>
-              <p class="text-xs text-slate-700 mt-4 font-medium leading-relaxed">
-                Abra o WhatsApp no seu celular → <span class="font-bold">Aparelhos Conectados</span> → <span
-                  class="font-bold">Conectar um aparelho</span> e escaneie o código acima.
-              </p>
-            </div>
-
-            <div id="wa-connected-ui"
-              class="hidden mt-6 p-6 bg-green-500/10 rounded-2xl border border-green-500/30 text-center fade-in">
-              <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
-              <p class="text-lg font-semibold text-white mb-2">WhatsApp Conectado!</p>
-              <p class="text-sm text-slate-400 mb-6">Tudo pronto para começar a automatizar.</p>
-              <button onclick="handleWhatsAppDisconnect()"
-                class="w-full py-2 bg-red-500/20 hover:bg-red-500/30 text-red-500 rounded-xl font-medium transition-all flex items-center justify-center gap-2 border border-red-500/30">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <p class="text-slate-400">Nenhum agendamento encontrado</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Contacts Tab -->
+        <div id="tab-contacts" class="tab-content hidden fade-in h-full w-full">
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+              <div class="relative">
+                <input type="text" placeholder="Buscar contatos..."
+                  class="w-64 bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 pl-10 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
+                <svg class="w-5 h-5 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor"
+                  viewbox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg> Desconectar WhatsApp
-              </button>
-            </div><!-- AI Settings -->
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div><select
+                class="bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:border-green-500">
+                <option>Todas as Tags</option>
+                <option>🔥 Hot Lead</option>
+                <option>💬 Em Negociação</option>
+                <option>✅ Cliente</option>
+              </select>
+            </div><button onclick="openAddContactModal()"
+              class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-xl font-medium transition-all glow-green">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg> Novo Contato </button>
+          </div>
+          <div class="glass-card rounded-2xl overflow-hidden overflow-x-auto">
+            <table class="w-full min-w-[800px]">
+              <thead class="bg-slate-800/50">
+                <tr>
+                  <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Contato</th>
+                  <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Telefone</th>
+                  <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Tags</th>
+                  <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Última Interação</th>
+                  <th class="text-left px-6 py-4 text-sm font-medium text-slate-400">Ações</th>
+                </tr>
+              </thead>
+              <tbody id="contacts-list">
+                <!-- Contacts will be rendered here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Automation Tab -->
+        <div id="tab-automation" class="tab-content hidden fade-in h-full w-full">
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-semibold text-white">Respostas Automáticas</h3><button
+              onclick="openAddAutomationModal()"
+              class="flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-2 rounded-xl font-medium transition-all glow-green">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg> Nova Automação </button>
+          </div>
+          <div id="automations-list" class="space-y-4">
+            <!-- Automations will be rendered here -->
+          </div>
+        </div>
+
+        <!-- Knowledge Base Tab -->
+        <div id="tab-knowledge" class="tab-content hidden fade-in h-full w-full">
+          <div class="flex items-center justify-between mb-6">
+            <div>
+              <h3 class="text-lg font-semibold text-white">Base de Conhecimento</h3>
+              <p class="text-sm text-slate-400">Treine a IA com perguntas e respostas</p>
+            </div><button onclick="openAddKnowledgeModal()"
+              class="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-4 py-2 rounded-xl font-medium transition-all glow-purple">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg> Adicionar Conhecimento </button>
+          </div>
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
             <div class="glass-card rounded-2xl p-6">
-              <h3 class="text-lg font-semibold text-white mb-4">Configurações da IA</h3>
-              <div class="space-y-4">
-                <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700 mb-4">
-                  <p class="text-sm text-slate-300 mb-2">🔗 <span class="font-medium">Provedor:</span> OpenRouter</p>
-                  <p class="text-xs text-slate-400">Obtenha sua chave gratuitamente em <a href="https://openrouter.ai"
-                      target="_blank" rel="noopener noreferrer"
-                      class="text-green-400 hover:text-green-300 underline">openrouter.ai</a></p>
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
                 </div>
                 <div>
-                  <label for="openrouter-key" class="block text-sm text-slate-400 mb-2">Chave API OpenRouter</label>
-                  <input type="password" id="openrouter-key" placeholder="sk-or-••••••••••••••••"
+                  <p class="text-2xl font-bold text-white" id="knowledge-count">0</p>
+                  <p class="text-sm text-slate-400">Perguntas Treinadas</p>
+                </div>
+              </div>
+              <div class="w-full bg-slate-700 rounded-full h-2">
+                <div class="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full" style="width: 45%"></div>
+              </div>
+              <p class="text-xs text-slate-400 mt-2">45% da capacidade utilizada</p>
+            </div>
+            <div class="glass-card rounded-2xl p-6">
+              <div class="flex items-center gap-3 mb-4">
+                <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                  <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="text-2xl font-bold text-white">94%</p>
+                  <p class="text-sm text-slate-400">Precisão de Respostas</p>
+                </div>
+              </div>
+              <div class="flex gap-2 mt-2">
+                <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">👍 234 úteis</span> <span
+                  class="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded-full">👎 14 não úteis</span>
+              </div>
+            </div>
+          </div>
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="p-4 border-b border-slate-700/50">
+              <input type="text" placeholder="Buscar na base de conhecimento..."
+                class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white placeholder-slate-400 focus:outline-none focus:border-purple-500">
+            </div>
+            <div id="knowledge-list" class="divide-y divide-slate-700/50">
+              <!-- Knowledge items will be rendered here -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Webhook Tab -->
+        <div id="tab-webhook" class="tab-content hidden fade-in h-full w-full">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass-card rounded-2xl p-6">
+              <h3 class="text-lg font-semibold text-white mb-4">Webhook de Destino</h3>
+              <p class="text-sm text-slate-400 mb-4">Insira a URL do seu sistema (n8n, Make, Typebot) para receber
+                os
+                eventos do WhatsApp em tempo real.</p>
+              <div class="space-y-4 mb-6">
+                <div>
+                  <label for="webhook-url" class="block text-sm text-slate-400 mb-2">URL do Webhook</label>
+                  <input type="url" id="webhook-url" placeholder="https://seu-n8n.com/webhook/..."
                     class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500">
                 </div>
-                <div>
-                  <label for="ai-model" class="block text-sm text-slate-400 mb-2">Modelo de IA</label> <select
-                    id="ai-model"
-                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500">
-                    <optgroup label="Modelos Gratuitos (Sem Custo)">
-                      <option value="z-ai/glm-4.5-air:free">Z-AI GLM-4.5-Air (Gratuito)</option>
-                      <option value="google/gemini-2.0-flash-exp:free">Google Gemini 2.0 Flash (Gratuito)</option>
-                      <option value="meta-llama/llama-3-8b-instruct:free">Llama 3 8B (Gratuito)</option>
-                      <option value="mistralai/mistral-7b-instruct:free">Mistral 7B (Gratuito)</option>
-                    </optgroup>
-                    <optgroup label="Modelos Pagos (Premium)">
-                      <option value="openai/gpt-4o">GPT-4o</option>
-                      <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
-                      <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                      <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
-                      <option value="anthropic/claude-3-sonnet">Claude 3 Sonnet</option>
-                    </optgroup>
-                  </select>
-                </div>
-                <div>
-                  <label for="ai-temperature" class="block text-sm text-slate-400 mb-2">Temperatura: <span
-                      id="temp-value">0.7</span></label> <input type="range" id="ai-temperature" min="0" max="1"
-                    step="0.1" value="0.7" class="w-full accent-green-500">
-                </div>
-                <div>
-                  <label for="system-prompt" class="block text-sm text-slate-400 mb-2">Prompt do Sistema</label>
-                  <textarea id="system-prompt" rows="4" placeholder="Você é um assistente virtual amigável..."
-                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:border-green-500 resize-none"></textarea>
-                </div>
-                <button onclick="saveAISettings()" id="btn-save-ai"
-                  class="w-full mt-2 flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-4 py-3 rounded-xl font-medium transition-all shadow-lg shadow-purple-500/25">
+                <button onclick="saveWebhookSettings()" id="btn-save-webhook"
+                  class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white px-4 py-3 rounded-xl font-medium transition-all shadow-lg shadow-blue-500/25">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                  </svg> Salvar Configurações da IA
+                  </svg> Salvar Webhook
                 </button>
               </div>
-            </div><!-- Anti-Ban Settings -->
+              <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl mb-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-3 h-3 rounded-full bg-green-500 pulse-dot"></div><span
+                    class="text-sm text-white">Webhook
+                    Ativo</span>
+                </div><label class="relative inline-flex items-center cursor-pointer"> <input type="checkbox" checked
+                    class="sr-only peer">
+                  <div
+                    class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500">
+                  </div>
+                </label>
+              </div>
+              <h4 class="text-sm font-medium text-white mb-3">Eventos Monitorados</h4>
+              <div class="space-y-2">
+                <label
+                  class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl cursor-pointer hover:bg-slate-700/50 transition-colors">
+                  <input type="checkbox" checked
+                    class="w-4 h-4 text-green-500 bg-slate-700 border-slate-600 rounded focus:ring-green-500"> <span
+                    class="text-sm text-white">Mensagem Recebida</span> </label> <label
+                  class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl cursor-pointer hover:bg-slate-700/50 transition-colors">
+                  <input type="checkbox" checked
+                    class="w-4 h-4 text-green-500 bg-slate-700 border-slate-600 rounded focus:ring-green-500"> <span
+                    class="text-sm text-white">Mensagem Enviada</span> </label> <label
+                  class="flex items-center gap-3 p-3 bg-slate-800/50 rounded-xl cursor-pointer hover:bg-slate-700/50 transition-colors">
+                  <input type="checkbox"
+                    class="w-4 h-4 text-green-500 bg-slate-700 border-slate-600 rounded focus:ring-green-500"> <span
+                    class="text-sm text-white">Status de Conexão</span> </label>
+              </div>
+            </div>
             <div class="glass-card rounded-2xl p-6">
-              <h3 class="text-lg font-semibold text-white mb-4">Configurações Anti-Banimento</h3>
-              <div class="space-y-4">
-                <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl">
+              <h3 class="text-lg font-semibold text-white mb-4">Últimos Eventos</h3>
+              <div class="space-y-3 max-h-96 overflow-y-auto">
+                <div class="p-3 bg-slate-800/50 rounded-xl">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs bg-green-500/20 text-green-400 px-2 py-1 rounded-full">message_received</span>
+                    <span class="text-xs text-slate-400">há 2 min</span>
+                  </div><code
+                    class="text-xs text-slate-300 block overflow-hidden text-ellipsis">{"from": "+5511999999999", "body": "Olá!"}</code>
+                </div>
+                <div class="p-3 bg-slate-800/50 rounded-xl">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full">message_sent</span>
+                    <span class="text-xs text-slate-400">há 5 min</span>
+                  </div><code
+                    class="text-xs text-slate-300 block overflow-hidden text-ellipsis">{"to": "+5511999999999", "body": "Olá! Como posso ajudar?"}</code>
+                </div>
+                <div class="p-3 bg-slate-800/50 rounded-xl">
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-xs bg-amber-500/20 text-amber-400 px-2 py-1 rounded-full">connection_update</span>
+                    <span class="text-xs text-slate-400">há 1 hora</span>
+                  </div><code
+                    class="text-xs text-slate-300 block overflow-hidden text-ellipsis">{"status": "connected"}</code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- Settings Tab -->
+        <div id="tab-settings" class="tab-content hidden fade-in h-full w-full">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left Column: Messaging & Connection (5/12) -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+              <!-- WhatsApp Connection -->
+              <div
+                class="glass-card rounded-2xl p-6 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700/50">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                  </div>
                   <div>
-                    <p class="text-sm text-white">Atraso entre mensagens</p>
-                    <p class="text-xs text-slate-400">Evita detecção de spam</p>
-                  </div><label class="relative inline-flex items-center cursor-pointer"> <input type="checkbox" checked
-                      class="sr-only peer">
+                    <h3 class="text-lg font-semibold text-white">Conexão WhatsApp</h3>
+                    <p class="text-xs text-slate-400">Instância Local (Baileys)</p>
+                  </div>
+                </div>
+
+                <div id="wa-connection-ui" class="space-y-4">
+                  <p class="text-sm text-slate-400 mb-4">O WhatsApp será conectado via QR Code oficial.</p>
+                  <button onclick="handleWhatsAppConnect()" id="btn-wa-connect"
+                    class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 py-3 rounded-xl font-medium transition-all shadow-lg shadow-green-500/20">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg> Gerar QR Code </button>
+                </div>
+
+                <div id="wa-pairing-ui"
+                  class="hidden mt-6 p-6 bg-white rounded-2xl border border-green-500/30 text-center fade-in">
+                  <div class="aspect-square max-w-64 mx-auto flex items-center justify-center p-2 relative">
                     <div
-                      class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500">
+                      class="absolute inset-0 border-4 border-green-500/20 border-t-green-500 rounded-xl animate-spin z-0">
                     </div>
-                  </label>
+                    <img id="wa-qr-img" src="" alt="Aguardando QR Code..."
+                      class="w-full h-full object-contain mix-blend-multiply relative z-10 bg-white p-2 rounded-lg">
+                  </div>
+                  <p class="text-xs text-slate-700 mt-4 font-medium leading-relaxed">
+                    Abra o WhatsApp no seu celular → <span class="font-bold text-green-600">Aparelhos
+                      Conectados</span> →
+                    <span class="font-bold text-green-600">Conectar um aparelho</span>
+                  </p>
                 </div>
-                <div>
-                  <label for="delay-min" class="block text-sm text-slate-400 mb-2">Atraso Mínimo (segundos)</label>
-                  <input type="number" id="delay-min" value="3"
-                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500">
+
+                <div id="wa-connected-ui"
+                  class="hidden mt-6 p-6 bg-green-500/10 rounded-2xl border border-green-500/30 text-center fade-in">
+                  <div
+                    class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 relative">
+                    <div class="absolute inset-0 rounded-full border border-green-500 pulse-dot"></div>
+                    <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <p class="text-lg font-semibold text-white mb-2">WhatsApp Conectado!</p>
+                  <p class="text-xs text-green-400 font-mono mb-6 bg-green-500/10 inline-block px-3 py-1 rounded-full">
+                    Sessão Ativa</p>
+                  <button onclick="handleWhatsAppDisconnect()"
+                    class="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-xl font-medium transition-all flex items-center justify-center gap-2 border border-red-500/30">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg> Desconectar WhatsApp
+                  </button>
                 </div>
-                <div>
-                  <label for="delay-max" class="block text-sm text-slate-400 mb-2">Atraso Máximo (segundos)</label>
-                  <input type="number" id="delay-max" value="10"
-                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500">
-                </div>
-                <div>
-                  <label for="daily-limit" class="block text-sm text-slate-400 mb-2">Limite Diário de
-                    Mensagens</label>
-                  <input type="number" id="daily-limit" value="500"
-                    class="w-full bg-slate-800/50 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-green-500">
-                </div>
-                <div class="flex items-center justify-between p-3 bg-slate-800/50 rounded-xl">
+              </div>
+
+              <!-- Anti-Ban Settings -->
+              <div
+                class="glass-card rounded-2xl p-6 hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700/50">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  </div>
                   <div>
-                    <p class="text-sm text-white">Simulação de digitação</p>
-                    <p class="text-xs text-slate-400">Humaniza as respostas</p>
-                  </div><label class="relative inline-flex items-center cursor-pointer"> <input type="checkbox" checked
-                      class="sr-only peer">
-                    <div
-                      class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-green-500">
+                    <h3 class="text-lg font-semibold text-white">Segurança Anti-Ban</h3>
+                    <p class="text-xs text-slate-400">Proteção da conta do WhatsApp</p>
+                  </div>
+                </div>
+
+                <div class="space-y-5">
+                  <div
+                    class="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                    <div>
+                      <p class="text-sm font-medium text-white mb-0.5">Atraso entre mensagens</p>
+                      <p class="text-xs text-slate-400">Evita detecção de comportamento de bot</p>
                     </div>
-                  </label>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked class="sr-only peer">
+                      <div
+                        class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 shadow-sm border border-slate-500/30">
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="grid grid-cols-2 gap-4">
+                    <div>
+                      <label for="delay-min" class="block text-xs font-medium text-slate-400 mb-1.5 ml-1">Atraso
+                        Mínimo
+                        (seg)</label>
+                      <div class="relative">
+                        <input type="number" id="delay-min" value="3"
+                          class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all text-sm">
+                      </div>
+                    </div>
+                    <div>
+                      <label for="delay-max" class="block text-xs font-medium text-slate-400 mb-1.5 ml-1">Atraso
+                        Máximo
+                        (seg)</label>
+                      <div class="relative">
+                        <input type="number" id="delay-max" value="10"
+                          class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all text-sm">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label for="daily-limit" class="block text-xs font-medium text-slate-400 mb-1.5 ml-1">Limite
+                      Diário de
+                      Mensagens</label>
+                    <div class="relative">
+                      <input type="number" id="daily-limit" value="500"
+                        class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-amber-500/50 focus:border-amber-500 transition-all text-sm">
+                    </div>
+                  </div>
+
+                  <div
+                    class="flex items-center justify-between p-4 bg-slate-800/50 rounded-xl border border-slate-700/50">
+                    <div>
+                      <p class="text-sm font-medium text-white mb-0.5">Simulação de digitação</p>
+                      <p class="text-xs text-slate-400">Humaniza o tempo de resposta ("digitando...")</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" checked class="sr-only peer">
+                      <div
+                        class="w-11 h-6 bg-slate-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500 shadow-sm border border-slate-500/30">
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: AI Brain (7/12) -->
+            <div class="lg:col-span-7">
+              <!-- AI Settings -->
+              <div
+                class="glass-card rounded-2xl p-6 h-full hover:-translate-y-1 hover:shadow-xl transition-all duration-300 group flex flex-col">
+                <div class="flex items-center gap-3 mb-6 pb-4 border-b border-slate-700/50 shrink-0">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewbox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 class="text-lg font-semibold text-white">O Cérebro da Operação (IA)</h3>
+                    <p class="text-xs text-slate-400">Configure como o agente de inteligência artificial interage
+                    </p>
+                  </div>
+                </div>
+
+                <div class="space-y-6 flex-1 flex flex-col">
+                  <!-- Status Banner -->
+                  <div
+                    class="p-4 bg-gradient-to-r from-slate-800 to-slate-800/50 rounded-xl border border-slate-700 flex items-center justify-between shrink-0">
+                    <div class="flex items-start gap-3">
+                      <div class="mt-1">
+                        <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                        </svg>
+                      </div>
+                      <div>
+                        <p class="text-sm font-medium text-white mb-0.5">Provedor Principal: <span
+                            class="text-purple-400">OpenRouter</span></p>
+                        <p class="text-xs text-slate-400">Acesse milhares de modelos avançados ou crie os seus. <a
+                            href="https://openrouter.ai" target="_blank" rel="noopener noreferrer"
+                            class="text-purple-400 hover:text-purple-300 underline font-medium ml-1 transition-colors">Obter
+                            chave grátis</a></p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="space-y-5 shrink-0">
+                    <div>
+                      <label for="openrouter-key" class="block text-sm font-medium text-slate-300 mb-2 ml-1">Chave
+                        API
+                        OpenRouter</label>
+                      <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                          </svg>
+                        </div>
+                        <input type="password" id="openrouter-key" placeholder="sk-or-••••••••••••••••••••••••"
+                          class="w-full bg-slate-900 border border-slate-700 rounded-xl pl-11 pr-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all font-mono text-sm shadow-inner">
+                      </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div>
+                        <label for="ai-model" class="block text-sm font-medium text-slate-300 mb-2 ml-1">Modelo de
+                          IA
+                          Responsável</label>
+                        <div class="relative">
+                          <select id="ai-model"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all text-sm appearance-none shadow-inner cursor-pointer">
+                            <optgroup label="Modelos Gratuitos (Sem Custo)">
+                              <option value="z-ai/glm-4.5-air:free">Z-AI GLM-4.5-Air (Gratuito)</option>
+                              <option value="google/gemini-2.0-flash-exp:free">Google Gemini 2.0 Flash (Gratuito)
+                              </option>
+                              <option value="meta-llama/llama-3-8b-instruct:free">Llama 3 8B (Gratuito)</option>
+                              <option value="mistralai/mistral-7b-instruct:free">Mistral 7B (Gratuito)</option>
+                            </optgroup>
+                            <optgroup label="Modelos Pagos (Premium)">
+                              <option value="openai/gpt-4o">GPT-4o (Recomendado)</option>
+                              <option value="openai/gpt-4-turbo">GPT-4 Turbo</option>
+                              <option value="openai/gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                              <option value="anthropic/claude-3-opus">Claude 3 Opus</option>
+                              <option value="anthropic/claude-3-sonnet">Claude 3.5 Sonnet</option>
+                            </optgroup>
+                          </select>
+                          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7">
+                              </path>
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div class="flex items-center justify-between mb-2 ml-1">
+                          <label for="ai-temperature" class="block text-sm font-medium text-slate-300">Temperatura
+                            (Criatividade)</label>
+                          <span id="temp-value"
+                            class="text-xs font-mono font-bold text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">0.7</span>
+                        </div>
+                        <div class="mt-4">
+                          <input type="range" id="ai-temperature" min="0" max="1" step="0.1" value="0.7"
+                            class="w-full accent-purple-500 outline-none">
+                        </div>
+                        <div
+                          class="flex justify-between text-[10px] text-slate-500 mt-1 uppercase tracking-wider font-semibold">
+                          <span>Preciso</span>
+                          <span>Equilibrado</span>
+                          <span>Criativo</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Textarea expands to fill remaining space -->
+                  <div class="flex-1 flex flex-col min-h-[160px] pt-2">
+                    <div class="flex items-center justify-between mb-2 ml-1">
+                      <label for="system-prompt" class="block text-sm font-medium text-slate-300">Instruções de
+                        Comportamento (System Prompt)</label>
+                      <button
+                        class="text-[10px] font-semibold uppercase tracking-wider text-slate-400 hover:text-white flex items-center gap-1 transition-colors">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg> Usar Modelo
+                      </button>
+                    </div>
+                    <textarea id="system-prompt"
+                      placeholder="Ex: Você é Maria, assistente de vendas da empresa X. Seja amigável, utilize emojis curtos e tente guiar o cliente para agendar uma reunião. Não invente preços."
+                      class="flex-1 w-full bg-slate-900 border border-slate-700 rounded-xl p-4 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 resize-none shadow-inner text-sm leading-relaxed"></textarea>
+                  </div>
+
+                  <div class="pt-4 shrink-0">
+                    <button onclick="saveAISettings()" id="btn-save-ai"
+                      class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 text-white px-4 py-3.5 rounded-xl font-semibold transition-all shadow-lg shadow-purple-500/25 active:scale-[0.98]">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                      </svg> Salvar Configurações da IA
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1634,7 +1679,11 @@
           const connectionUI = document.getElementById('wa-connection-ui');
           const qrImg = document.getElementById('wa-qr-img');
 
-          if (data.status === 'open') {
+          if (typeof updateGlobalConnectionStatus === 'function') {
+            updateGlobalConnectionStatus(data.status);
+          }
+
+          if (data.status === 'open' || data.status === 'connected') {
             connectedUI.classList.remove('hidden');
             pairingUI.classList.add('hidden');
             connectionUI.classList.add('hidden');
@@ -1642,11 +1691,13 @@
             showToast('Conectado!', 'success');
           } else {
             const qrRes = await fetch('/api/whatsapp/qr');
-            const qrData = await qrRes.json();
-            if (qrData.qr) {
-              pairingUI.classList.remove('hidden');
-              connectionUI.classList.add('hidden');
-              qrImg.src = qrData.qr;
+            if (qrRes.ok) {
+              const qrData = await qrRes.json();
+              if (qrData.qr) {
+                pairingUI.classList.remove('hidden');
+                connectionUI.classList.add('hidden');
+                qrImg.src = qrData.qr;
+              }
             }
           }
         } catch (err) {
@@ -1659,6 +1710,14 @@
     startStatusPolling();
 
     // Utility Functions
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+
+      sidebar.classList.toggle('-translate-x-full');
+      overlay.classList.toggle('hidden');
+    }
+
     function getInitials(name) {
       return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     }
@@ -1994,9 +2053,74 @@
       return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
+    function initWebSocketVars() {
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const wsUrl = `${protocol}//${window.location.host}`;
+      window.ws = new WebSocket(wsUrl);
+
+      window.ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === 'wa_qr') {
+            const qrImg = document.getElementById('wa-qr-img');
+            const pairingUI = document.getElementById('wa-pairing-ui');
+            const connectionUI = document.getElementById('wa-connection-ui');
+
+            if (qrImg && pairingUI && connectionUI) {
+              qrImg.src = msg.qr;
+              pairingUI.classList.remove('hidden');
+              connectionUI.classList.add('hidden');
+            }
+          } else if (msg.type === 'init_chats') {
+            allChats = msg.data || [];
+            renderChatList();
+          } else if (msg.type === 'new_message') {
+            handleNewIncomingMessage(msg.data);
+          } else if (msg.type === 'wa_status') {
+            updateGlobalConnectionStatus(msg.data.connection || msg.data.status);
+          }
+        } catch (e) { console.error('WS MSG Error:', e); }
+      };
+
+      window.updateGlobalConnectionStatus = function (status) {
+        const dot = document.getElementById('sidebar-status-dot');
+        const text = document.getElementById('sidebar-status-text');
+        const pairingUI = document.getElementById('wa-pairing-ui');
+        const connectedUI = document.getElementById('wa-connected-ui');
+        const connectionUI = document.getElementById('wa-connection-ui');
+
+        if (!dot || !text) return;
+        if (status === 'open' || status === 'connected') {
+          dot.className = 'w-3 h-3 rounded-full bg-green-500 pulse-dot';
+          text.className = 'text-sm font-medium text-green-400';
+          text.textContent = 'WhatsApp Conectado';
+          if (connectedUI) connectedUI.classList.remove('hidden');
+          if (pairingUI) pairingUI.classList.add('hidden');
+          if (connectionUI) connectionUI.classList.add('hidden');
+        } else if (status === 'connecting') {
+          dot.className = 'w-3 h-3 rounded-full bg-yellow-500 pulse-dot';
+          text.className = 'text-sm font-medium text-yellow-400';
+          text.textContent = 'Conectando...';
+        } else {
+          dot.className = 'w-3 h-3 rounded-full bg-red-500';
+          text.className = 'text-sm font-medium text-red-500';
+          text.textContent = 'Desconectado';
+          if (status === 'close' || status === 'logged_out') {
+            if (connectedUI) connectedUI.classList.add('hidden');
+            if (connectionUI) connectionUI.classList.remove('hidden');
+            if (pairingUI) pairingUI.classList.add('hidden');
+          }
+        }
+      };
+
+      window.ws.onclose = () => {
+        setTimeout(initWebSocketVars, 5000); // Reconnect WS
+      };
+    }
+
     // Initialize logic
     async function loadSavedSettings() {
-      initChatWebSocket();
+      initWebSocketVars();
       // Load Webhook Config
       const savedWebhook = localStorage.getItem('webhook_settings');
       if (savedWebhook) {

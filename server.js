@@ -70,7 +70,25 @@ app.get('/api/whatsapp/status', authenticateJWT, (req, res) => {
 });
 
 app.get('/api/whatsapp/qr', authenticateJWT, (req, res) => {
-    res.json({ qr: whatsappService.getQR() });
+    const qr = whatsappService.getQR();
+    if (qr) {
+        res.json({ qr });
+    } else {
+        res.json({ qr: null, status: whatsappService.getConnectionStatus() });
+    }
+});
+
+app.post('/api/whatsapp/restart', authenticateJWT, async (req, res) => {
+    res.json({ status: whatsappService.getConnectionStatus() });
+});
+
+app.post('/api/whatsapp/connect', authenticateJWT, async (req, res) => {
+    try {
+        await whatsappService.reconnect();
+        res.json({ success: true, message: 'Solicitando novo QR Code...' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 app.post('/api/whatsapp/disconnect', authenticateJWT, async (req, res) => {
@@ -167,10 +185,13 @@ app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'login.html'));
 });
 
-// Protect static index.html
+// App presentation landing page
 app.get('/', (req, res) => {
-    // In a simple SPA like this, we'll let the frontend handle the redirect if token is missing
-    // but the API calls are already protected.
+    res.sendFile(path.join(__dirname, 'landing.html'));
+});
+
+// Main dashboard application
+app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
@@ -201,18 +222,22 @@ whatsappService.on('connection_update', (update) => {
     broadcastToDashboard({ type: 'wa_status', data: update });
 });
 
+whatsappService.on('qr_code', (qrDataUrl) => {
+    broadcastToDashboard({ type: 'wa_qr', qr: qrDataUrl });
+});
+
 whatsappService.on('new_message', async (msg) => {
     broadcastToDashboard({ type: 'new_message', data: msg });
 
     // Auto-save contact if new
-    if (!msg.fromMe) {
+    if (!msg.fromMe && msg.remoteJid) {
         try {
             await prisma.contact.upsert({
-                where: { phone: msg.jid },
+                where: { phone: msg.remoteJid },
                 update: {},
                 create: {
-                    phone: msg.jid,
-                    name: msg.pushName || msg.jid.split('@')[0]
+                    phone: msg.remoteJid,
+                    name: msg.pushName || msg.remoteJid.split('@')[0]
                 }
             });
         } catch (e) {

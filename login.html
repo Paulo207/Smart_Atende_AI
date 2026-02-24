@@ -181,7 +181,7 @@
 
                 if (response.ok) {
                     localStorage.setItem('token', data.token);
-                    window.location.href = '/';
+                    window.location.href = '/dashboard';
                 } else {
                     alert(data.error || 'Falha na autenticação');
                     btnLogin.innerHTML = originalBtnText;
@@ -198,7 +198,7 @@
         // Check if already logged in
         const token = localStorage.getItem('token');
         if (token) {
-            window.location.href = '/';
+            window.location.href = '/dashboard';
         }
     </script>
 </body>

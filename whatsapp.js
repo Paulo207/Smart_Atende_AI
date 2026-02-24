@@ -8,6 +8,7 @@ const {
 const pino = require("pino");
 const path = require("path");
 const fs = require("fs");
+const QRCode = require('qrcode');
 const aiService = require("./ai_service");
 const { EventEmitter } = require("events");
 
@@ -45,13 +46,20 @@ class WhatsAppService extends EventEmitter {
       const { connection, lastDisconnect, qr } = update;
 
       if (qr) {
-        this.qrCodeStr = qr;
-        console.log("📲 Novo QR Code recebido!");
+        try {
+          this.qrCodeStr = await QRCode.toDataURL(qr);
+          console.log("📲 Novo QR Code recebido e convertido!");
+          this.emit('qr_code', this.qrCodeStr); // Added line to emit event
+        } catch (err) {
+          console.error("Erro ao converter QR Code:", err);
+          this.qrCodeStr = null;
+        }
       }
 
       if (connection) {
         this.connectionStatus = connection;
         console.log(`📡 Status da conexão: ${connection}`);
+        this.emit('connection_update', { connection });
       }
 
       if (connection === "open") {
@@ -117,36 +125,74 @@ class WhatsAppService extends EventEmitter {
 
         try {
           // Envia lido
-          await this.sock.readMessages([msg.key]);
+          try {
+            await this.sock.readMessages([msg.key]);
+          } catch (e) { console.error("Aviso: Falha ao enviar read receipt:", e); }
 
-          // Simula digitação por 1 a 3 segundos
-          await this.sock.sendPresenceUpdate('composing', remoteJid);
+          // Simula digitação
+          try {
+            await this.sock.sendPresenceUpdate('composing', remoteJid);
+          } catch (e) { console.error("Aviso: Falha ao enviar composing:", e); }
+
           const typingDelay = Math.floor(Math.random() * (3000 - 1000 + 1)) + 1000;
           await new Promise(r => setTimeout(r, typingDelay));
 
           // Processa IA
+          console.log(`🧠 Iniciando processamento de IA para ${remoteJid}...`);
           const { aiReply, confirmation } = await aiService.processMessage(remoteJid, text);
 
-          await this.sock.sendPresenceUpdate('paused', remoteJid);
+          try {
+            await this.sock.sendPresenceUpdate('paused', remoteJid);
+          } catch (e) { console.error("Aviso: Falha ao enviar paused:", e); }
 
           if (aiReply) {
-            await this.sock.sendMessage(remoteJid, { text: aiReply });
-            console.log(`🤖 IA respondeu para ${remoteJid}`);
+            console.log(`🤖 Preparando para enviar resposta IA:`, aiReply.substring(0, 50) + "...");
+            const formattedJid = remoteJid.includes('@') ? remoteJid : `${remoteJid}@s.whatsapp.net`;
+            await this.sock.sendMessage(formattedJid, { text: aiReply });
+            console.log(`🤖 IA respondeu com sucesso para ${remoteJid}`);
 
             // Se houver uma confirmação de agendamento, envia logo em seguida
             if (confirmation) {
               await new Promise(r => setTimeout(r, 1500)); // Pequeno delay antes do comprovante
-              await this.sock.sendMessage(remoteJid, { text: confirmation });
+              await this.sock.sendMessage(formattedJid, { text: confirmation });
               console.log(`✅ Comprovante de agendamento enviado para ${remoteJid}`);
             }
+          } else {
+            console.log("⚠️ A IA não retornou resposta (aiReply = null ou falha na API).");
           }
         } catch (err) {
-          console.error(`Erro ao processar mensagem de ${remoteJid}:`, err);
+          console.error(`Erro GERAL ao processar mensagem de ${remoteJid}:`, err);
         }
       }
     });
 
     return this.sock;
+  }
+
+  async sendMessage(jid, text) {
+    if (!this.sock) {
+      throw new Error("WhatsApp não está inicializado.");
+    }
+
+    // Safety format to ensure sending works correctly
+    const formattedJid = jid.includes('@') ? jid : `${jid}@s.whatsapp.net`;
+
+    const result = await this.sock.sendMessage(formattedJid, { text });
+
+    // Local tracking
+    const messageData = {
+      id: result.key.id,
+      remoteJid: formattedJid,
+      text,
+      fromMe: true,
+      timestamp: Math.floor(Date.now() / 1000)
+    };
+    if (!this.chats.has(formattedJid)) this.chats.set(formattedJid, []);
+    this.chats.get(formattedJid).push(messageData);
+    if (this.chats.get(formattedJid).length > 50) this.chats.get(formattedJid).shift();
+
+    this.emit('new_message', messageData);
+    return messageData;
   }
 
   async reconnect() {
